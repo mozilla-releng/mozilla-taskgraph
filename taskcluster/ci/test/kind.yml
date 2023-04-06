@@ -2,7 +2,6 @@
 loader: taskgraph.loader.transform:loader
 
 transforms:
-  - mozilla_taskgraph_taskgraph.transforms.hello:transforms
   - taskgraph.transforms.job:transforms
   - taskgraph.transforms.task:transforms
 
@@ -14,8 +13,9 @@ task-defaults:
 
 tasks:
   world:
-    noun: world
     run:
       using: run-task
       command: >-
-          echo "Hello $NOUN!"
+          pip install --user -r requirements/test.txt --require-hashes &&
+          pip install --user --no-deps . &&
+          pytest
