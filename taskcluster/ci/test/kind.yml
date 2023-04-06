@@ -12,7 +12,8 @@ task-defaults:
     max-run-time: 1800
 
 tasks:
-  world:
+  unit:
+    description: "Run Python unit tests."
     run:
       using: run-task
       command: >-
