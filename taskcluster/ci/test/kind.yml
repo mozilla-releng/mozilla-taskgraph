@@ -17,6 +17,6 @@ tasks:
     run:
       using: run-task
       command: >-
-          pip install --user -r requirements/test.txt --require-hashes &&
-          pip install --user --no-deps . &&
+          python -mpip install --user -r requirements/test.txt --require-hashes &&
+          python -mpip install --user --no-deps . &&
           pytest
