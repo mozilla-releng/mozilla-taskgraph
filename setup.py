@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 project_dir = os.path.abspath(os.path.dirname(__file__))
 
 namespace = {}
-version_file = convert_path("src/taskgraph/__init__.py")
+version_file = convert_path("src/mozilla_taskgraph/__init__.py")
 with open(version_file) as fh:
     exec(fh.read(), namespace)
 
