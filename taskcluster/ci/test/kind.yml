@@ -6,6 +6,10 @@ transforms:
   - taskgraph.transforms.task:transforms
 
 task-defaults:
+  run:
+    using: run-task
+    cwd: "{checkout}"
+    cache-dotcache: true
   worker-type: linux
   worker:
     docker-image: {in-tree: linux}
@@ -15,7 +19,6 @@ tasks:
   unit:
     description: "Run Python unit tests."
     run:
-      using: run-task
       command: >-
           python -mpip install --user -r requirements/test.txt --require-hashes &&
           python -mpip install --user --no-deps . &&
