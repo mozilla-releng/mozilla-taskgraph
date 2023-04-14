@@ -20,9 +20,9 @@ def fetch_secret(secret_name):
     return r.json()["secret"]
 
 
-token = fetch_secret(
-    "project/releng/taskgraph/mozilla-taskgraph/build/level-1/codecov"
-)["token"]
+token = fetch_secret("project/releng/taskgraph/mozilla-taskgraph/ci")[
+    "codecov_api_token"
+]
 uploader = FETCHES_DIR / "codecov"
 uploader.chmod(uploader.stat().st_mode | stat.S_IEXEC)
 subprocess.run(
