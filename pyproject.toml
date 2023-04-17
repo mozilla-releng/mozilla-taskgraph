@@ -1,0 +1,28 @@
+[tool.black]
+line-length = 88
+
+[tool.pytest.ini_options]
+xfail_strict = true
+
+[tool.coverage.run]
+parallel = true
+branch = true
+source = ["src/mozilla_taskgraph/", "mozilla_taskgraph"]
+
+[tool.ruff]
+select = [
+    "E", "W",       # pycodestyle
+    "F",            # pyflakes
+    "I",            # isort
+    "PLC", "PLE",   # pylint
+    "UP",           # pyupgrade
+]
+ignore = [
+    "E402",
+    "E501",  # let black handle line-length
+    "E741",
+]
+target-version = "py37"
+
+[tool.ruff.isort]
+known-first-party = ["mozilla_taskgraph"]
