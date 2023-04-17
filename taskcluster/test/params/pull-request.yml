@@ -1,0 +1,28 @@
+---
+base_ref: main
+base_repository: https://github.com/mozilla-releng/mozilla-taskgraph
+base_rev: a0785edae4a841b6119925280c744000f59b903e
+build_date: 1681154438
+build_number: 1
+do_not_optimize: []
+enable_always_target: true
+existing_tasks: {}
+filters:
+  - target_tasks_method
+head_ref: codecov
+head_repository: https://github.com/user/mozilla-taskgraph
+head_rev: 06c766e8e9d558eed5ccf8029164120a27af5fb1
+head_tag: ''
+level: '1'
+moz_build_date: '20230410192038'
+next_version: null
+optimize_strategies: null
+optimize_target_tasks: true
+owner: user@example.com
+project: mozilla-taskgraph
+pushdate: 0
+pushlog_id: '0'
+repository_type: git
+target_tasks_method: default
+tasks_for: github-pull-request
+version: null
