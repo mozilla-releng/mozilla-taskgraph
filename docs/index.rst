@@ -55,9 +55,9 @@ See `Taskgraph's documentation`_ for general information on using Taskgraph.
 
 .. _Taskgraph's documentation: https://taskcluster-taskgraph.readthedocs.io
 
-Indices and tables
-------------------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :hidden:
+   :maxdepth: 3
+
+   transforms/index
