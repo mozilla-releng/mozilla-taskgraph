@@ -1,0 +1,6 @@
+-r base.txt
+sphinx~=5.3.0
+sphinx-autobuild
+sphinx-argparse
+sphinx-book-theme
+sphinxcontrib-mermaid
