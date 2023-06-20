@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+set -vx
+
+# Use pipx to avoid Poetry's curl | bash installer.
+python3 -mpip install --user pipx
+python3 -mpipx ensurepath
+python3 -mpipx install poetry~=1.5.1

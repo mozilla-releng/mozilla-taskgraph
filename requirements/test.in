@@ -1,6 +1,0 @@
--r base.in
-coverage
-pytest
-pytest-mock
-responses
-tox

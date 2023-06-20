@@ -23,6 +23,7 @@ RUN apt-get update && \
 
 # %include-run-task
 
-# %include requirements/base.txt
-ADD topsrcdir/requirements/base.txt /builds/worker/base.txt
-RUN python3 -mpip install -r base.txt
+# %include taskcluster/scripts/poetry-setup
+ADD topsrcdir/taskcluster/scripts/poetry-setup /builds/worker/poetry-setup
+RUN /builds/worker/poetry-setup
+RUN poetry install
