@@ -29,7 +29,12 @@ ENV PYENV_ROOT=/builds/worker/.pyenv \
     PATH=/builds/worker/.pyenv/bin:/builds/worker/.pyenv/shims:$PATH
 # %include taskcluster/scripts/pyenv-setup
 ADD topsrcdir/taskcluster/scripts/pyenv-setup /builds/worker/pyenv-setup
-RUN chmod +x /builds/worker/pyenv-setup && /builds/worker/pyenv-setup "$PYENV_VERSIONS"
+RUN /builds/worker/pyenv-setup "$PYENV_VERSIONS"
+
+# poetry
+# %include taskcluster/scripts/poetry-setup
+ADD topsrcdir/taskcluster/scripts/poetry-setup /builds/worker/poetry-setup
+RUN /builds/worker/poetry-setup
 
 # Set a default command useful for debugging
 CMD ["/bin/bash", "--login"]

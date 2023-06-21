@@ -30,7 +30,6 @@ tasks:
         TOX_PARALLEL_NO_SPINNER: "1"
     run:
       command: >-
-          python -mpip install --user -r requirements/test.txt --require-hashes &&
-          python -mpip install --user --no-deps . &&
+          poetry install --with test &&
           pyenv local 3.11 3.10 3.9 3.8 3.7 &&
           tox --parallel
