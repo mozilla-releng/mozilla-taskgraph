@@ -11,9 +11,11 @@ def datadir():
     return here / "data"
 
 
-def fake_load_graph_config(root_dir):
-    graph_config = GraphConfig(
-        {
+@pytest.fixture(scope="session")
+def make_graph_config(datadir):
+    def inner(root_dir=None, extra_config=None):
+        root_dir = root_dir or str(datadir / "taskcluster" / "ci")
+        config = {
             "trust-domain": "test-domain",
             "taskgraph": {
                 "repositories": {
@@ -43,16 +45,20 @@ def fake_load_graph_config(root_dir):
                     "fake",
                 ],
             },
-        },
-        root_dir,
-    )
-    graph_config.__dict__["register"] = lambda: None
-    return graph_config
+        }
+        if extra_config:
+            config.update(extra_config)
+
+        graph_config = GraphConfig(config, root_dir)
+        graph_config.__dict__["register"] = lambda: None
+        return graph_config
+
+    return inner
 
 
-@pytest.fixture
-def graph_config(datadir):
-    return fake_load_graph_config(str(datadir / "taskcluster" / "ci"))
+@pytest.fixture(scope="session")
+def graph_config(make_graph_config):
+    return make_graph_config()
 
 
 class FakeParameters(dict):
@@ -93,16 +99,20 @@ def parameters():
 
 @pytest.fixture
 def make_transform_config(parameters, graph_config):
-    def inner(kind_config=None, kind_dependencies_tasks=None):
+    def inner(
+        kind_config=None, kind_dependencies_tasks=None, graph_cfg=None, params=None
+    ):
         kind_config = kind_config or {}
         kind_dependencies_tasks = kind_dependencies_tasks or {}
+        graph_cfg = graph_cfg or graph_config
+        params = params or parameters
         return TransformConfig(
             "test",
             str(here),
             kind_config,
-            parameters,
+            params,
             kind_dependencies_tasks,
-            graph_config,
+            graph_cfg,
             write_artifacts=False,
         )
 
