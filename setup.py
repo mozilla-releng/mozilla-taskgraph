@@ -5,17 +5,16 @@ from setuptools import find_packages, setup
 
 project_dir = os.path.abspath(os.path.dirname(__file__))
 
-namespace = {}
-version_file = convert_path("src/mozilla_taskgraph/__init__.py")
+version_file = convert_path("version.txt")
 with open(version_file) as fh:
-    exec(fh.read(), namespace)
+    version = fh.read().strip()
 
 with open(os.path.join(project_dir, "requirements/base.in")) as fp:
     requirements = fp.read().splitlines()
 
 setup(
     name="mozilla-taskgraph",
-    version=namespace["__version__"],
+    version=version,
     description="Mozilla-specific transforms and utilities for Taskgraph",
     url="https://github.com/mozilla-releng/mozilla-taskgraph",
     packages=find_packages("src"),
