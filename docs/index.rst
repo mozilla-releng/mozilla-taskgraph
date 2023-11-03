@@ -61,3 +61,4 @@ See `Taskgraph's documentation`_ for general information on using Taskgraph.
    :maxdepth: 3
 
    transforms/index
+   actions/index

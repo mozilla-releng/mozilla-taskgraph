@@ -1,9 +1,32 @@
 from pathlib import Path
 
 import pytest
+import taskcluster_urls as liburl
+from responses import RequestsMock
+from taskgraph import create
+from taskgraph.actions import trigger_action_callback
+from taskgraph.graph import Graph
+from taskgraph.task import Task
+from taskgraph.taskgraph import TaskGraph
 from taskgraph.transforms.base import GraphConfig, TransformConfig
+from taskgraph.util import taskcluster as tc_util
+
+from mozilla_taskgraph.actions import release_promotion
 
 here = Path(__file__).parent
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_taskcluster_url(session_mocker):
+    session_mocker.patch.dict(
+        "os.environ", {"TASKCLUSTER_ROOT_URL": liburl.test_root_url()}
+    )
+
+
+@pytest.fixture
+def responses():
+    with RequestsMock() as rsps:
+        yield rsps
 
 
 @pytest.fixture(scope="session")
@@ -14,7 +37,7 @@ def datadir():
 @pytest.fixture(scope="session")
 def make_graph_config(datadir):
     def inner(root_dir=None, extra_config=None):
-        root_dir = root_dir or str(datadir / "taskcluster" / "ci")
+        root_dir = root_dir or str(datadir / "taskcluster")
         config = {
             "trust-domain": "test-domain",
             "taskgraph": {
@@ -130,3 +153,70 @@ def run_transform(make_transform_config):
         return list(func(config, tasks))
 
     return inner
+
+
+@pytest.fixture
+def run_action(mocker, monkeypatch, graph_config):
+    # Monkeypatch these here so they get restored to their original values.
+    # Otherwise, `trigger_action_callback` will leave them set to `True` and
+    # cause failures in other tests.
+    monkeypatch.setattr(create, "testing", True)
+    monkeypatch.setattr(tc_util, "testing", True)
+
+    def inner(name, parameters, input):
+        m = mocker.patch.object(release_promotion, "taskgraph_decision")
+        m.return_value = lambda *args, **kwargs: (args, kwargs)
+
+        trigger_action_callback(
+            task_group_id="group-id",
+            task_id=None,
+            input=input,
+            callback=name,
+            parameters=parameters,
+            root=graph_config.root_dir,
+            test=True,
+        )
+        return m
+
+    return inner
+
+
+def make_task(
+    label,
+    kind="test",
+    optimization=None,
+    task_def=None,
+    task_id=None,
+    dependencies=None,
+    if_dependencies=None,
+    attributes=None,
+):
+    task_def = task_def or {
+        "sample": "task-def",
+        "deadline": {"relative-datestamp": "1 hour"},
+    }
+    task = Task(
+        attributes=attributes or {},
+        if_dependencies=if_dependencies or [],
+        kind=kind,
+        label=label,
+        task=task_def,
+    )
+    task.optimization = optimization
+    task.task_id = task_id
+    if dependencies is not None:
+        task.task["dependencies"] = sorted(dependencies)
+    return task
+
+
+def make_graph(*tasks_and_edges, **kwargs):
+    tasks = {t.label: t for t in tasks_and_edges if isinstance(t, Task)}
+    edges = {e for e in tasks_and_edges if not isinstance(e, Task)}
+    tg = TaskGraph(tasks, Graph(set(tasks), edges))
+
+    if kwargs.get("deps", True):
+        # set dependencies based on edges
+        for l, r, name in tg.graph.edges:
+            tg.tasks[l].dependencies[name] = r
+
+    return tg
