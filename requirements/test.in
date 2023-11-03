@@ -3,4 +3,5 @@ coverage
 pytest
 pytest-mock
 responses
+taskcluster_urls
 tox

@@ -11,6 +11,7 @@ def register(graph_config):
     # Import modules to register decorated functions
     _import_modules(
         [
+            "actions",
             "config",
             "worker_types",
         ]
