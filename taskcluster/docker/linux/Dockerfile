@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.19.0
 LABEL maintainer="Mozilla Release Engineering <release+docker@mozilla.com>"
 
 # Add worker user
@@ -11,10 +11,8 @@ RUN mkdir /builds && \
 RUN apk update
 
 # Setup Python
-RUN apk add --no-cache python3 && \
-    ln -sf python3 /usr/bin/python && \
-    python3 -m ensurepip && \
-    pip3 install --no-cache --upgrade pip setuptools
+RUN apk add --no-cache python3 py3-pip && \
+    ln -sf python3 /usr/bin/python
 
 # Setup other dependencies
 RUN apk add bash git
