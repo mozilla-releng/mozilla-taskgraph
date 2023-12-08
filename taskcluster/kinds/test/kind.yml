@@ -2,7 +2,7 @@
 loader: taskgraph.loader.transform:loader
 
 transforms:
-  - taskgraph.transforms.job:transforms
+  - taskgraph.transforms.run:transforms
   - taskgraph.transforms.task:transforms
 
 task-defaults:
@@ -32,5 +32,5 @@ tasks:
       command: >-
           python -mpip install --user -r requirements/test.txt --require-hashes &&
           python -mpip install --user --no-deps . &&
-          pyenv local 3.11 3.10 3.9 3.8 3.7 &&
+          pyenv local 3.11 3.10 3.9 3.8 &&
           tox --parallel

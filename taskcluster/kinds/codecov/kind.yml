@@ -5,7 +5,7 @@
 loader: taskgraph.loader.transform:loader
 
 transforms:
-    - taskgraph.transforms.job:transforms
+    - taskgraph.transforms.run:transforms
     - taskgraph.transforms.task:transforms
 
 kind-dependencies:
@@ -35,5 +35,5 @@ tasks:
             using: run-task
             cwd: '{checkout}'
             command: >-
-                python -mpip install --user -r requirements/test.txt --require-hashes &&
+                python -mpip install --user --break-system-packages -r requirements/test.txt --require-hashes &&
                 python taskcluster/scripts/codecov-upload.py
