@@ -12,13 +12,15 @@
 
 ## 1.0.1 (2023-09-19)
 
-### Feat
-
-- **shipit**: add shipit mark_as_shipped transforms and worker-type
-
 ### Fix
 
 - mark compatible with Taskgraph 6.x
+
+## 1.0.0 (2023-12-20)
+
+### Feat
+
+- **shipit**: add shipit mark_as_shipped transforms and worker-type
 
 ## 0.1.1 (2023-06-21)
 
