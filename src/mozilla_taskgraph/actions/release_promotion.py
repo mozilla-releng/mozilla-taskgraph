@@ -28,6 +28,16 @@ from mozilla_taskgraph.actions import make_action_available
                 "default": "<REPLACE ME>",
                 "enum": sorted(graph_config["release-promotion"]["flavors"].keys()),
             },
+            "build_number": {
+                "type": "integer",
+                "default": 1,
+                "minimum": 1,
+                "title": "The release build number",
+                "description": (
+                    "The release build number. Starts at 1 per "
+                    "release version, and increments on rebuild."
+                ),
+            },
             "do_not_optimize": {
                 "type": "array",
                 "description": (
@@ -63,6 +73,7 @@ from mozilla_taskgraph.actions import make_action_available
         },
         "required": [
             "release_promotion_flavor",
+            "build_number",
         ],
     },
 )
@@ -107,6 +118,7 @@ def release_promotion_action(parameters, graph_config, input, task_group_id, tas
     )
     parameters["do_not_optimize"] = do_not_optimize
     parameters["target_tasks_method"] = target_tasks_method
+    parameters["build_number"] = int(input["build_number"])
 
     # When doing staging releases, we still want to reuse tasks from previous
     # graphs.
