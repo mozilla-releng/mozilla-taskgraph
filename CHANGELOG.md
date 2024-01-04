@@ -1,3 +1,9 @@
+## 1.1.1 (2024-01-04)
+
+### Fix
+
+- **release_promotion**: add missing build_number parameter
+
 ## 1.1.0 (2023-12-20)
 
 ### Feat
