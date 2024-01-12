@@ -13,6 +13,7 @@ transforms = TransformSequence()
 
 mark_as_shipped_schema = Schema(
     {
+        Optional("name"): str,
         Optional("shipit-product"): optionally_keyed_by("build-type", str),
         Extra: object,
     }
@@ -63,7 +64,7 @@ def make_task_description(config, tasks):
                 )
             )
 
-        task.setdefault("label", "mark-as-shipped")
+        task.setdefault("label", task.pop("name", "mark-as-shipped"))
         task["description"] = f"Mark {product} as shipped in Ship-It"
         task["scopes"] = [
             f"{scope_prefix}:action:mark-as-shipped",
