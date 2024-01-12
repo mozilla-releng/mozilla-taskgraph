@@ -15,7 +15,7 @@ def assert_missing_product(e):
 def assert_default_level_1(task):
     assert task == {
         "description": "Mark app as shipped in Ship-It",
-        "label": "mark-as-shipped",
+        "label": "mark-shipped",
         "scopes": [
             "project:releng:ship-it:action:mark-as-shipped",
             "project:releng:ship-it:server:staging",
@@ -79,7 +79,7 @@ def assert_product_in_task_keyed_by(task):
         pytest.param(
             {"shipit": {"product": "app"}},
             {"version": "1.0.0", "level": "1"},
-            {},
+            {"name": "mark-shipped"},
             id="default_level_1",
         ),
         pytest.param(
