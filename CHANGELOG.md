@@ -1,3 +1,13 @@
+## 1.2.0 (2024-01-16)
+
+### Feat
+
+- **shipit**: allow 'mark-as-shipped' to define product in task
+
+### Fix
+
+- **shipit**: use task name instead of 'mark-as-shipped' as default label
+
 ## 1.1.1 (2024-01-04)
 
 ### Fix
@@ -22,7 +32,7 @@
 
 - mark compatible with Taskgraph 6.x
 
-## 1.0.0 (2023-12-20)
+## 1.0.0 (2023-07-28)
 
 ### Feat
 
