@@ -1,3 +1,9 @@
+## 1.2.1 (2024-01-18)
+
+### Fix
+
+- **shipit**: make 'shipit.product' optional in graph_config schema
+
 ## 1.2.0 (2024-01-16)
 
 ### Feat
