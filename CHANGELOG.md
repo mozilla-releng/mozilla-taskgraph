@@ -1,3 +1,9 @@
+## 1.2.2 (2024-01-23)
+
+### Fix
+
+- **relpro**: set 'version' parameter
+
 ## 1.2.1 (2024-01-18)
 
 ### Fix
