@@ -1,6 +1,7 @@
 from taskgraph.decision import taskgraph_decision
 from taskgraph.parameters import Parameters
 from taskgraph.taskgraph import TaskGraph
+from taskgraph.util.python_path import find_object
 from taskgraph.util.taskcluster import get_artifact
 from taskgraph.util.taskgraph import (
     find_decision_task,
@@ -125,6 +126,12 @@ def release_promotion_action(parameters, graph_config, input, task_group_id, tas
     parameters["optimize_target_tasks"] = True
     parameters["shipping_phase"] = input["release_promotion_flavor"]
     parameters["tasks_for"] = "action"
+
+    version_parser_objpath = "mozilla_taskgraph.version:default_parser"
+    if "version-parser" in graph_config:
+        version_parser_objpath = graph_config["version-parser"]
+    version_func = find_object(version_parser_objpath)
+    parameters["version"] = version_func(parameters)
 
     # make parameters read-only
     parameters = Parameters(**parameters)
