@@ -36,6 +36,11 @@ def datadir():
 
 
 @pytest.fixture(scope="session")
+def repo_root():
+    return here.parent
+
+
+@pytest.fixture(scope="session")
 def make_graph_config(datadir):
     def inner(root_dir=None, extra_config=None):
         root_dir = root_dir or str(datadir / "taskcluster")
@@ -86,7 +91,7 @@ def parameters():
             "target_tasks_method": "test_method",
             "tasks_for": "hg-push",
             "try_mode": None,
-            "version": "1.0.0",
+            "version": "",
         }
     )
 
@@ -133,10 +138,16 @@ def run_action(mocker, monkeypatch, graph_config):
     # cause failures in other tests.
     monkeypatch.setattr(create, "testing", True)
     monkeypatch.setattr(tc_util, "testing", True)
+    root_dir = graph_config.root_dir
 
-    def inner(name, parameters, input):
+    def inner(name, parameters, input, graph_config=None):
         m = mocker.patch.object(release_promotion, "taskgraph_decision")
         m.return_value = lambda *args, **kwargs: (args, kwargs)
+
+        gc_mock = None
+        if graph_config:
+            gc_mock = mocker.patch("taskgraph.actions.registry.load_graph_config")
+            gc_mock.return_value = graph_config
 
         trigger_action_callback(
             task_group_id="group-id",
@@ -144,9 +155,13 @@ def run_action(mocker, monkeypatch, graph_config):
             input=input,
             callback=name,
             parameters=parameters,
-            root=graph_config.root_dir,
+            root=root_dir,
             test=True,
         )
+
+        if gc_mock:
+            gc_mock.reset()
+
         return m
 
     return inner

@@ -1,3 +1,4 @@
+import sys
 from itertools import count
 
 import pytest
@@ -12,6 +13,12 @@ from ..conftest import make_graph, make_task
 @pytest.fixture(scope="session", autouse=True)
 def enable():
     enable_action("release-promotion")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_version(session_mocker):
+    m = session_mocker.patch("mozilla_taskgraph.version.default_parser")
+    m.return_value = "1.0.0"
 
 
 @pytest.fixture
@@ -85,11 +92,42 @@ def test_release_promotion(parameters, setup, run_action, datadir):
             "shipping_phase": "promote",
             "target_tasks_method": "target_promote",
             "tasks_for": "action",
+            "version": "1.0.0",
         }
     )
 
     input = {"build_number": "2", "release_promotion_flavor": "promote"}
     mock = run_action("release-promotion", parameters, input)
+    assert_call(datadir, mock, expected_params)
+
+
+def test_release_promotion_custom_version_parser(
+    parameters, setup, run_action, datadir, make_graph_config
+):
+    setup()
+    expected_params = parameters.copy()
+    expected_params.update(
+        {
+            "build_number": 2,
+            "do_not_optimize": [],
+            "existing_tasks": {"a": 0, "b": 1},
+            "optimize_target_tasks": True,
+            "shipping_phase": "promote",
+            "target_tasks_method": "target_promote",
+            "tasks_for": "action",
+            "version": "99",
+        }
+    )
+
+    graph_config = make_graph_config(
+        extra_config={"version-parser": "testver:fake_version"}
+    )
+    input = {"build_number": "2", "release_promotion_flavor": "promote"}
+    try:
+        sys.path.insert(0, str(datadir))
+        mock = run_action("release-promotion", parameters, input, graph_config)
+    finally:
+        sys.path.pop(0)
     assert_call(datadir, mock, expected_params)
 
 
@@ -126,6 +164,7 @@ def test_release_promotion_combine_previous_graphs(
             "shipping_phase": "ship",
             "target_tasks_method": "target_ship",
             "tasks_for": "action",
+            "version": "1.0.0",
         }
     )
 
@@ -157,6 +196,7 @@ def test_release_promotion_rebuild_kinds(parameters, setup, run_action, datadir)
             "shipping_phase": "promote",
             "target_tasks_method": "target_promote",
             "tasks_for": "action",
+            "version": "1.0.0",
         }
     )
 
