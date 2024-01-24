@@ -6,8 +6,17 @@ taskgraph:
     ci:
       name: Mozilla Taskgraph
 workers:
-  aliases: {}
-
+  aliases:
+    b-linux:
+      provisioner: taskgraph-b
+      implementation: generic-worker
+      os: linux
+      worker-type: linux
+    t-linux:
+      provisioner: taskgraph-t
+      implementation: docker-worker
+      os: linux
+      worker-type: linux
 release-promotion:
   flavors:
     promote:

@@ -5,6 +5,7 @@ import taskcluster_urls as liburl
 from responses import RequestsMock
 from taskgraph import create
 from taskgraph.actions import trigger_action_callback
+from taskgraph.config import load_graph_config
 from taskgraph.graph import Graph
 from taskgraph.task import Task
 from taskgraph.taskgraph import TaskGraph
@@ -38,37 +39,7 @@ def datadir():
 def make_graph_config(datadir):
     def inner(root_dir=None, extra_config=None):
         root_dir = root_dir or str(datadir / "taskcluster")
-        config = {
-            "trust-domain": "test-domain",
-            "taskgraph": {
-                "repositories": {
-                    "ci": {"name": "Mozilla Taskgraph"},
-                }
-            },
-            "workers": {
-                "aliases": {
-                    "b-linux": {
-                        "provisioner": "taskgraph-b",
-                        "implementation": "generic-worker",
-                        "os": "linux",
-                        "worker-type": "linux",
-                    },
-                    "t-linux": {
-                        "provisioner": "taskgraph-t",
-                        "implementation": "docker-worker",
-                        "os": "linux",
-                        "worker-type": "linux",
-                    },
-                }
-            },
-            "task-priority": "low",
-            "treeherder": {"group-names": {"T": "tests"}},
-            "index": {
-                "products": [
-                    "fake",
-                ],
-            },
-        }
+        config = load_graph_config(root_dir)._config.copy()
         if extra_config:
             config.update(extra_config)
 
