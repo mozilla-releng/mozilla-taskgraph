@@ -20,3 +20,13 @@ workers:
       implementation: docker-worker
       os: linux
       worker-type: '{alias}-gcp'
+    succeed:
+      provisioner: built-in
+      implementation: succeed
+      os: none
+      worker-type: succeed
+
+release-promotion:
+  flavours:
+    ship:
+      target-tasks-method: ship-target-tasks
