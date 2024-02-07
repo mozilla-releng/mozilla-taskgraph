@@ -12,4 +12,3 @@ def ship_target_tasks(full_task_graph, parameters, graph_config):
             return True
 
     return [label for label, task in full_task_graph.tasks.items() if filter(task)]
-
