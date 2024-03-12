@@ -74,13 +74,15 @@ class FakeParameters(dict):
 def parameters():
     return FakeParameters(
         {
-            "base_repository": "http://hg.example.com",
+            "base_ref": "123456",
+            "base_repository": "http://example.com/base/repo",
             "build_date": 0,
             "build_number": 1,
             "enable_always_target": True,
-            "head_repository": "http://hg.example.com",
+            "head_repository": "http://example.com/head/repo",
             "head_rev": "abcdef",
             "head_ref": "default",
+            "head_tag": "",
             "level": "1",
             "moz_build_date": 0,
             "next_version": "1.0.1",
