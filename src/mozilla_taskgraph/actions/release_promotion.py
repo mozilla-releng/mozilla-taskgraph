@@ -39,6 +39,17 @@ from mozilla_taskgraph.actions import make_action_available
                     "release version, and increments on rebuild."
                 ),
             },
+            "version": {
+                "type": "string",
+                "description": (
+                    "Optional: override the version for release promotion. "
+                    "Occasionally we'll land a taskgraph fix in a later "
+                    "commit, but want to act on a build from a previous "
+                    "commit. If a version bump has landed in the meantime, "
+                    "relying on the in-tree version will break things."
+                ),
+                "default": "",
+            },
             "do_not_optimize": {
                 "type": "array",
                 "description": (
@@ -127,11 +138,15 @@ def release_promotion_action(parameters, graph_config, input, task_group_id, tas
     parameters["shipping_phase"] = input["release_promotion_flavor"]
     parameters["tasks_for"] = "action"
 
-    version_parser_objpath = "mozilla_taskgraph.version:default_parser"
-    if "version-parser" in graph_config:
-        version_parser_objpath = graph_config["version-parser"]
-    version_func = find_object(version_parser_objpath)
-    parameters["version"] = version_func(parameters)
+    if input["version"]:
+        parameters["version"] = input["version"]
+    else:
+        if "version-parser" in graph_config:
+            version_parser_objpath = graph_config["version-parser"]
+        else:
+            version_parser_objpath = "mozilla_taskgraph.version:default_parser"
+        version_func = find_object(version_parser_objpath)
+        parameters["version"] = version_func(parameters)
 
     # make parameters read-only
     parameters = Parameters(**parameters)
