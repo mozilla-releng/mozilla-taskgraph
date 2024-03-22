@@ -1,4 +1,16 @@
-## 1.2.2 (2024-01-23)
+## 1.3.0 (2024-03-22)
+
+### Feat
+
+- **relpro**: allow passing "version" in release-promotion input
+- create a bitrisescript payload builder
+- Add dummy release promotion task to allow this repository to be used to verify upcoming changes to Ship It & scopes
+
+### Fix
+
+- look for version.txt in cwd, not where mozilla-taskgraph is installed
+
+## 1.2.2 (2024-01-24)
 
 ### Fix
 
