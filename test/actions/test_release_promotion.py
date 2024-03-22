@@ -96,7 +96,7 @@ def test_release_promotion(parameters, setup, run_action, datadir):
         }
     )
 
-    input = {"build_number": "2", "release_promotion_flavor": "promote"}
+    input = {"build_number": "2", "release_promotion_flavor": "promote", "version": ""}
     mock = run_action("release-promotion", parameters, input)
     assert_call(datadir, mock, expected_params)
 
@@ -122,7 +122,7 @@ def test_release_promotion_custom_version_parser(
     graph_config = make_graph_config(
         extra_config={"version-parser": "testver:fake_version"}
     )
-    input = {"build_number": "2", "release_promotion_flavor": "promote"}
+    input = {"build_number": "2", "release_promotion_flavor": "promote", "version": ""}
     try:
         sys.path.insert(0, str(datadir))
         mock = run_action("release-promotion", parameters, input, graph_config)
@@ -172,6 +172,7 @@ def test_release_promotion_combine_previous_graphs(
         "build_number": "1",
         "release_promotion_flavor": "ship",
         "previous_graph_ids": ["d0", "d1"],
+        "version": "",
     }
     mock = run_action("release-promotion", parameters, input)
     assert_call(datadir, mock, expected_params)
@@ -205,6 +206,32 @@ def test_release_promotion_rebuild_kinds(parameters, setup, run_action, datadir)
         "release_promotion_flavor": "promote",
         "rebuild_kinds": ["rebuild"],
         "previous_graph_ids": ["d0"],
+        "version": "",
+    }
+    mock = run_action("release-promotion", parameters, input)
+    assert_call(datadir, mock, expected_params)
+
+
+def test_release_promotion_version(parameters, setup, run_action, datadir):
+    setup()
+    expected_params = parameters.copy()
+    expected_params.update(
+        {
+            "build_number": 2,
+            "do_not_optimize": [],
+            "existing_tasks": {"a": 0, "b": 1},
+            "optimize_target_tasks": True,
+            "shipping_phase": "promote",
+            "target_tasks_method": "target_promote",
+            "tasks_for": "action",
+            "version": "2.0",
+        }
+    )
+
+    input = {
+        "build_number": "2",
+        "release_promotion_flavor": "promote",
+        "version": "2.0",
     }
     mock = run_action("release-promotion", parameters, input)
     assert_call(datadir, mock, expected_params)
