@@ -12,10 +12,15 @@ with open(version_file) as fh:
 with open(os.path.join(project_dir, "requirements/base.in")) as fp:
     requirements = fp.read().splitlines()
 
+with open(os.path.join(project_dir, "README.md")) as fh:
+    long_description = fh.read()
+
 setup(
     name="mozilla-taskgraph",
     version=version,
     description="Mozilla-specific transforms and utilities for Taskgraph",
+    long_description=long_description,
+    long_description_content_type="text/x-md",
     url="https://github.com/mozilla-releng/mozilla-taskgraph",
     packages=find_packages("src"),
     package_dir={"": "src"},
