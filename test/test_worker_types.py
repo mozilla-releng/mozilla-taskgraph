@@ -21,9 +21,11 @@ from mozilla_taskgraph import worker_types
             {},
             {
                 "payload": {
-                    "branch": "default",
-                    "branch_repo_owner": "http://example.com/head/repo",
-                    "commit_hash": "abcdef",
+                    "build_params": {
+                        "branch": "default",
+                        "branch_repo_owner": "http://example.com/head/repo",
+                        "commit_hash": "abcdef",
+                    },
                 },
                 "scopes": [
                     "foo:bitrise:app:some-app",
@@ -39,12 +41,14 @@ from mozilla_taskgraph import worker_types
             {"tasks_for": "github-pull-request"},
             {
                 "payload": {
-                    "branch": "default",
-                    "branch_dest": "123456",
-                    "branch_dest_repo_owner": "http://example.com/base/repo",
-                    "branch_repo_owner": "http://example.com/head/repo",
-                    "commit_hash": "abcdef",
-                    "pull_request_author": "some-owner",
+                    "build_params": {
+                        "branch": "default",
+                        "branch_dest": "123456",
+                        "branch_dest_repo_owner": "http://example.com/base/repo",
+                        "branch_repo_owner": "http://example.com/head/repo",
+                        "commit_hash": "abcdef",
+                        "pull_request_author": "some-owner",
+                    },
                 },
                 "scopes": ["foo:bitrise:app:some-app", "foo:bitrise:workflow:bar"],
                 "tags": {"worker-implementation": "scriptworker"},
@@ -62,10 +66,12 @@ from mozilla_taskgraph import worker_types
             },
             {
                 "payload": {
-                    "branch_repo_owner": "http://example.com/head/repo",
-                    "commit_hash": "abcdef",
-                    "pull_request_author": "some-owner",
-                    "tag": "some-tag",
+                    "build_params": {
+                        "branch_repo_owner": "http://example.com/head/repo",
+                        "commit_hash": "abcdef",
+                        "pull_request_author": "some-owner",
+                        "tag": "some-tag",
+                    }
                 },
                 "scopes": ["foo:bitrise:app:some-app", "foo:bitrise:workflow:bar"],
                 "tags": {"worker-implementation": "scriptworker"},
