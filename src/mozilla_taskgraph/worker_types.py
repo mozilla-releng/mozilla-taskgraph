@@ -73,7 +73,7 @@ from voluptuous import Extra, Optional, Required
 )
 def build_bitrise_payload(config, task, task_def):
     bitrise = task["worker"]["bitrise"]
-    build_params = task_def["payload"] = bitrise.get("build_params") or {}
+    build_params = bitrise.get("build_params") or {}
     task_def["tags"]["worker-implementation"] = "scriptworker"
 
     scope_prefix = config.graph_config["scriptworker"]["scope-prefix"]
@@ -103,6 +103,8 @@ def build_bitrise_payload(config, task, task_def):
             build_params.setdefault(
                 "branch_dest_repo_owner", config.params["base_repository"]
             )
+
+    task_def["payload"] = {"build_params": build_params}
 
 
 @payload_builder(
