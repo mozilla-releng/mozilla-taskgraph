@@ -1,3 +1,9 @@
+## 1.3.1 (2024-03-28)
+
+### Fix
+
+- Move bitrise build parameters under a 'build_params' namespace
+
 ## 1.3.0 (2024-03-22)
 
 ### Feat
