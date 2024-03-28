@@ -20,7 +20,7 @@ setup(
     version=version,
     description="Mozilla-specific transforms and utilities for Taskgraph",
     long_description=long_description,
-    long_description_content_type="text/x-md",
+    long_description_content_type="text/markdown",
     url="https://github.com/mozilla-releng/mozilla-taskgraph",
     packages=find_packages("src"),
     package_dir={"": "src"},
