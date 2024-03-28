@@ -87,17 +87,28 @@ def build_bitrise_payload(config, task, task_def):
     build_params.setdefault("commit_hash", config.params["head_rev"])
     build_params.setdefault("branch_repo_owner", config.params["head_repository"])
 
-    if config.params["head_ref"]:
-        build_params.setdefault("branch", config.params["head_ref"])
+    def shortref(ref):
+        if ref:
+            for prefix in ("refs/heads/", "refs/tags/"):
+                if ref.startswith(prefix):
+                    return ref[len(prefix) :]
+        return ref
 
-    if config.params["head_tag"]:
-        build_params.setdefault("tag", config.params["head_tag"])
+    head_ref = shortref(config.params["head_ref"])
+    head_tag = shortref(config.params["head_tag"])
+    base_ref = shortref(config.params["base_ref"])
+
+    if head_ref:
+        build_params.setdefault("branch", head_ref)
+
+    if head_tag:
+        build_params.setdefault("tag", head_tag)
 
     if config.params["tasks_for"] == "github-pull-request":
         build_params.setdefault("pull_request_author", config.params["owner"])
 
-        if config.params["base_ref"]:
-            build_params.setdefault("branch_dest", config.params["base_ref"])
+        if base_ref:
+            build_params.setdefault("branch_dest", base_ref)
 
         if config.params["base_repository"]:
             build_params.setdefault(
