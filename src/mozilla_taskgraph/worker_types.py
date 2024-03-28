@@ -87,17 +87,32 @@ def build_bitrise_payload(config, task, task_def):
     build_params.setdefault("commit_hash", config.params["head_rev"])
     build_params.setdefault("branch_repo_owner", config.params["head_repository"])
 
-    if config.params["head_ref"]:
-        build_params.setdefault("branch", config.params["head_ref"])
+    def normref(ref, type="heads"):
+        if ref:
+            prefix = f"refs/{type}/"
+            if ref.startswith(prefix):
+                return ref[len(prefix) :]
+            # The ref is a different type than the requested one, return None
+            # to indicate this.
+            elif ref.startswith("refs/"):
+                return None
+        return ref
 
-    if config.params["head_tag"]:
-        build_params.setdefault("tag", config.params["head_tag"])
+    head_ref = normref(config.params["head_ref"])
+    head_tag = normref(config.params["head_tag"], type="tags")
+    base_ref = normref(config.params["base_ref"])
+
+    if head_ref:
+        build_params.setdefault("branch", head_ref)
+
+    if head_tag:
+        build_params.setdefault("tag", head_tag)
 
     if config.params["tasks_for"] == "github-pull-request":
         build_params.setdefault("pull_request_author", config.params["owner"])
 
-        if config.params["base_ref"]:
-            build_params.setdefault("branch_dest", config.params["base_ref"])
+        if base_ref:
+            build_params.setdefault("branch_dest", base_ref)
 
         if config.params["base_repository"]:
             build_params.setdefault(
