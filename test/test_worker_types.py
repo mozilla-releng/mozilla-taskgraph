@@ -78,6 +78,31 @@ from mozilla_taskgraph import worker_types
             },
             id="opposite params",  # this test helps hit other half of if statements
         ),
+        pytest.param(
+            {"bitrise": {"app": "some-app", "workflows": ["bar"]}},
+            {
+                "base_ref": "refs/heads/foo",
+                "base_repository": "",
+                "head_ref": "refs/heads/bar",
+                "head_tag": "refs/tags/some-tag",
+                "tasks_for": "github-pull-request",
+            },
+            {
+                "payload": {
+                    "build_params": {
+                        "branch": "bar",
+                        "branch_dest": "foo",
+                        "branch_repo_owner": "http://example.com/head/repo",
+                        "commit_hash": "abcdef",
+                        "pull_request_author": "some-owner",
+                        "tag": "some-tag",
+                    }
+                },
+                "scopes": ["foo:bitrise:app:some-app", "foo:bitrise:workflow:bar"],
+                "tags": {"worker-implementation": "scriptworker"},
+            },
+            id="normalize refs",
+        ),
     ),
 )
 def test_build_bitrise_payload(
