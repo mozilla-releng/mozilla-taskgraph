@@ -1,3 +1,9 @@
+## 1.3.2 (2024-04-02)
+
+### Fix
+
+- **bitrise**: normalize refs in bitrise payload builder
+
 ## 1.3.1 (2024-03-28)
 
 ### Fix
