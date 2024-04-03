@@ -1,4 +1,4 @@
-from taskgraph.transforms.task import payload_builder
+from taskgraph.transforms.task import payload_builder, taskref_or_string
 from voluptuous import Extra, Optional, Required
 
 
@@ -13,6 +13,9 @@ from voluptuous import Extra, Optional, Required
                 "workflows",
                 description="List of workflows to trigger on specified app.",
             ): [str],
+            Optional(
+                "env", description="Environment variables to pass into the build"
+            ): {str: taskref_or_string},
             Optional(
                 "build_params",
                 description="Parameters describing the build context to pass "
@@ -49,7 +52,7 @@ from voluptuous import Extra, Optional, Required
                 Optional(
                     "environments",
                     description="Environment variables to pass into the build.",
-                ): dict,
+                ): [{Required("mapped_to"): str, Optional("value"): taskref_or_string}],
                 Optional(
                     "pull_request_author",
                     description="The author of the pull request running the build.",
@@ -82,6 +85,13 @@ def build_bitrise_payload(config, task, task_def):
     scopes.extend(
         [f"{scope_prefix}:bitrise:workflow:{wf}" for wf in bitrise["workflows"]]
     )
+
+    # Normalize environment variables to bitrise's format.
+    env = bitrise.get("env", {})
+    if env:
+        build_params.setdefault("environments", [])
+        for k, v in env.items():
+            build_params["environments"].append({"mapped_to": k, "value": v})
 
     # Set some build_params implicitly from Taskcluster params.
     build_params.setdefault("commit_hash", config.params["head_rev"])

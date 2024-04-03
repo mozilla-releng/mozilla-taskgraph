@@ -125,6 +125,41 @@ from mozilla_taskgraph import worker_types
             },
             id="normalize refs wrong type",
         ),
+        pytest.param(
+            {
+                "bitrise": {
+                    "app": "some-app",
+                    "env": {
+                        "FOO": "bar",
+                        "PATH": {"artifact-reference": "<build/target.zip>"},
+                    },
+                    "workflows": ["bar"],
+                }
+            },
+            {},
+            {
+                "payload": {
+                    "build_params": {
+                        "branch": "default",
+                        "branch_repo_owner": "http://example.com/head/repo",
+                        "commit_hash": "abcdef",
+                        "environments": [
+                            {"mapped_to": "FOO", "value": "bar"},
+                            {
+                                "mapped_to": "PATH",
+                                "value": {"artifact-reference": "<build/target.zip>"},
+                            },
+                        ],
+                    },
+                },
+                "scopes": [
+                    "foo:bitrise:app:some-app",
+                    "foo:bitrise:workflow:bar",
+                ],
+                "tags": {"worker-implementation": "scriptworker"},
+            },
+            id="environments",
+        ),
     ),
 )
 def test_build_bitrise_payload(
