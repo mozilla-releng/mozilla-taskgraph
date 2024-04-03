@@ -1,3 +1,9 @@
+## 1.4.0 (2024-04-05)
+
+### Feat
+
+- **bitrise**: support an easier format for environment variables
+
 ## 1.3.2 (2024-04-02)
 
 ### Fix
