@@ -1,3 +1,9 @@
+## 1.4.1 (2024-04-09)
+
+### Fix
+
+- declare support for Taskgraph 8.x
+
 ## 1.4.0 (2024-04-05)
 
 ### Feat
