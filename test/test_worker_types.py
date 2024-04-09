@@ -160,6 +160,32 @@ from mozilla_taskgraph import worker_types
             },
             id="environments",
         ),
+        pytest.param(
+            {
+                "bitrise": {
+                    "artifact_prefix": "public",
+                    "app": "some-app",
+                    "workflows": ["bar"],
+                }
+            },
+            {},
+            {
+                "payload": {
+                    "artifact_prefix": "public",
+                    "build_params": {
+                        "branch": "default",
+                        "branch_repo_owner": "http://example.com/head/repo",
+                        "commit_hash": "abcdef",
+                    },
+                },
+                "scopes": [
+                    "foo:bitrise:app:some-app",
+                    "foo:bitrise:workflow:bar",
+                ],
+                "tags": {"worker-implementation": "scriptworker"},
+            },
+            id="artifact prefix",
+        ),
     ),
 )
 def test_build_bitrise_payload(

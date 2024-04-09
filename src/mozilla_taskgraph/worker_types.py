@@ -70,6 +70,11 @@ from voluptuous import Extra, Optional, Required
                     "tag", description="The tag of the commit running the build."
                 ): str,
             },
+            Optional(
+                "artifact_prefix",
+                description="Directory prefix to store artifacts. Set this to 'public' "
+                "to create public artifacts.",
+            ): str,
         },
         Extra: object,
     },
@@ -129,7 +134,9 @@ def build_bitrise_payload(config, task, task_def):
                 "branch_dest_repo_owner", config.params["base_repository"]
             )
 
-    task_def["payload"] = {"build_params": build_params}
+    payload = task_def["payload"] = {"build_params": build_params}
+    if bitrise.get("artifact_prefix"):
+        payload["artifact_prefix"] = bitrise["artifact_prefix"]
 
 
 @payload_builder(
