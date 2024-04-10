@@ -1,4 +1,4 @@
-FROM alpine:3.19.0
+FROM alpine:3.19.1
 LABEL maintainer="Mozilla Release Engineering <release+docker@mozilla.com>"
 
 # Add worker user
