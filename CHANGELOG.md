@@ -1,3 +1,9 @@
+## 1.5.0 (2024-04-11)
+
+### Feat
+
+- **bitrise**: support new 'artifact_prefix' task config
+
 ## 1.4.1 (2024-04-09)
 
 ### Fix
