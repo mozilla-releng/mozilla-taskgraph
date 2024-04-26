@@ -12,16 +12,36 @@ from mozilla_taskgraph import worker_types
     "worker,extra_params,expected",
     (
         pytest.param({}, {}, Exception, id="missing bitrise"),
-        pytest.param({"bitrise": {"workflows": []}}, {}, Exception, id="missing app"),
+        pytest.param(
+            {"bitrise": {"workflows": ["foo"]}}, {}, Exception, id="missing app"
+        ),
         pytest.param(
             {"bitrise": {"app": "foo"}}, {}, Exception, id="missing workflows"
+        ),
+        pytest.param(
+            {"bitrise": {"app": "foo", "workflows": {"err": "nope"}}},
+            {},
+            Exception,
+            id="wrong workflows format",
+        ),
+        pytest.param(
+            {"bitrise": {"app": "foo", "workflows": [{"nope": ["wut"]}]}},
+            {},
+            Exception,
+            id="wrong workflows format2",
+        ),
+        pytest.param(
+            {"bitrise": {"app": "foo", "workflows": [{"foo": {"bar": ["oops"]}}]}},
+            {},
+            Exception,
+            id="wrong workflows format3",
         ),
         pytest.param(
             {"bitrise": {"app": "some-app", "workflows": ["bar", "baz"]}},
             {},
             {
                 "payload": {
-                    "build_params": {
+                    "global_params": {
                         "branch": "default",
                         "branch_repo_owner": "http://example.com/head/repo",
                         "commit_hash": "abcdef",
@@ -41,7 +61,7 @@ from mozilla_taskgraph import worker_types
             {"tasks_for": "github-pull-request"},
             {
                 "payload": {
-                    "build_params": {
+                    "global_params": {
                         "branch": "default",
                         "branch_dest": "123456",
                         "branch_dest_repo_owner": "http://example.com/base/repo",
@@ -66,7 +86,7 @@ from mozilla_taskgraph import worker_types
             },
             {
                 "payload": {
-                    "build_params": {
+                    "global_params": {
                         "branch_repo_owner": "http://example.com/head/repo",
                         "commit_hash": "abcdef",
                         "pull_request_author": "some-owner",
@@ -89,7 +109,7 @@ from mozilla_taskgraph import worker_types
             },
             {
                 "payload": {
-                    "build_params": {
+                    "global_params": {
                         "branch": "bar",
                         "branch_dest": "foo",
                         "branch_repo_owner": "http://example.com/head/repo",
@@ -114,7 +134,7 @@ from mozilla_taskgraph import worker_types
             },
             {
                 "payload": {
-                    "build_params": {
+                    "global_params": {
                         "branch_repo_owner": "http://example.com/head/repo",
                         "commit_hash": "abcdef",
                         "pull_request_author": "some-owner",
@@ -129,31 +149,42 @@ from mozilla_taskgraph import worker_types
             {
                 "bitrise": {
                     "app": "some-app",
-                    "env": {
-                        "FOO": "bar",
-                        "PATH": {"artifact-reference": "<build/target.zip>"},
-                    },
-                    "workflows": ["bar"],
+                    "workflows": [
+                        "foo",
+                        {
+                            "bar": {
+                                "FOO": "bar",
+                                "PATH": {"artifact-reference": "<build/target.zip>"},
+                            }
+                        },
+                    ],
                 }
             },
             {},
             {
                 "payload": {
-                    "build_params": {
+                    "global_params": {
                         "branch": "default",
                         "branch_repo_owner": "http://example.com/head/repo",
                         "commit_hash": "abcdef",
-                        "environments": [
-                            {"mapped_to": "FOO", "value": "bar"},
-                            {
-                                "mapped_to": "PATH",
-                                "value": {"artifact-reference": "<build/target.zip>"},
-                            },
-                        ],
+                    },
+                    "workflow_params": {
+                        "bar": {
+                            "environments": [
+                                {"mapped_to": "FOO", "value": "bar"},
+                                {
+                                    "mapped_to": "PATH",
+                                    "value": {
+                                        "artifact-reference": "<build/target.zip>"
+                                    },
+                                },
+                            ]
+                        }
                     },
                 },
                 "scopes": [
                     "foo:bitrise:app:some-app",
+                    "foo:bitrise:workflow:foo",
                     "foo:bitrise:workflow:bar",
                 ],
                 "tags": {"worker-implementation": "scriptworker"},
@@ -172,7 +203,7 @@ from mozilla_taskgraph import worker_types
             {
                 "payload": {
                     "artifact_prefix": "public",
-                    "build_params": {
+                    "global_params": {
                         "branch": "default",
                         "branch_repo_owner": "http://example.com/head/repo",
                         "commit_hash": "abcdef",
