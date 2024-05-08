@@ -58,7 +58,11 @@ from mozilla_taskgraph import worker_types
         ),
         pytest.param(
             {"bitrise": {"app": "some-app", "workflows": ["bar"]}},
-            {"tasks_for": "github-pull-request"},
+            {
+                "tasks_for": "github-pull-request",
+                "commit_message": "This is a commit",
+                "pull_request_number": "123",
+            },
             {
                 "payload": {
                     "global_params": {
@@ -68,6 +72,8 @@ from mozilla_taskgraph import worker_types
                         "branch_repo_owner": "http://example.com/head/repo",
                         "commit_hash": "abcdef",
                         "pull_request_author": "some-owner",
+                        "commit_message": "This is a commit",
+                        "pull_request_id": "123",
                     },
                 },
                 "scopes": ["foo:bitrise:app:some-app", "foo:bitrise:workflow:bar"],
@@ -83,6 +89,8 @@ from mozilla_taskgraph import worker_types
                 "head_ref": "",
                 "head_tag": "some-tag",
                 "tasks_for": "github-pull-request",
+                "commit_message": "This is a commit",
+                "pull_request_number": "123",
             },
             {
                 "payload": {
@@ -91,6 +99,8 @@ from mozilla_taskgraph import worker_types
                         "commit_hash": "abcdef",
                         "pull_request_author": "some-owner",
                         "tag": "some-tag",
+                        "commit_message": "This is a commit",
+                        "pull_request_id": "123",
                     }
                 },
                 "scopes": ["foo:bitrise:app:some-app", "foo:bitrise:workflow:bar"],
@@ -106,6 +116,8 @@ from mozilla_taskgraph import worker_types
                 "head_ref": "refs/heads/bar",
                 "head_tag": "refs/tags/some-tag",
                 "tasks_for": "github-pull-request",
+                "commit_message": "This is a commit",
+                "pull_request_number": "123",
             },
             {
                 "payload": {
@@ -116,6 +128,8 @@ from mozilla_taskgraph import worker_types
                         "commit_hash": "abcdef",
                         "pull_request_author": "some-owner",
                         "tag": "some-tag",
+                        "commit_message": "This is a commit",
+                        "pull_request_id": "123",
                     }
                 },
                 "scopes": ["foo:bitrise:app:some-app", "foo:bitrise:workflow:bar"],
@@ -131,6 +145,8 @@ from mozilla_taskgraph import worker_types
                 "head_ref": "refs/tags/bar",
                 "head_tag": "refs/heads/some-tag",
                 "tasks_for": "github-pull-request",
+                "commit_message": "This is a commit",
+                "pull_request_number": "123",
             },
             {
                 "payload": {
@@ -138,6 +154,8 @@ from mozilla_taskgraph import worker_types
                         "branch_repo_owner": "http://example.com/head/repo",
                         "commit_hash": "abcdef",
                         "pull_request_author": "some-owner",
+                        "commit_message": "This is a commit",
+                        "pull_request_id": "123",
                     }
                 },
                 "scopes": ["foo:bitrise:app:some-app", "foo:bitrise:workflow:bar"],
