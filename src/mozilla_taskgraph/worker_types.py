@@ -17,8 +17,8 @@ from voluptuous import Any, Extra, Optional, Required
                 Any(
                     # Workflow id - no special environment variable
                     str,
-                    # Map of workflow id to environment variables
-                    {str: {str: taskref_or_string}},
+                    # Map of workflow id to permutations of environment variables
+                    {str: [{str: taskref_or_string}]},
                 )
             ],
             Optional(
@@ -35,16 +35,20 @@ def build_bitrise_payload(config, task, task_def):
     task_def["tags"]["worker-implementation"] = "scriptworker"
 
     # Normalize environment variables to bitrise's format.
-    workflow_params = {}
+    workflow_permutations = {}
     for workflow in bitrise["workflows"]:
         if isinstance(workflow, str):
             # Empty environments
             continue
-        for workflow_id, envs in workflow.items():
-            workflow_params[workflow_id] = {"environments": []}
-            for k, v in envs.items():
-                workflow_params[workflow_id]["environments"].append(
-                    {"mapped_to": k, "value": v},
+        for workflow_id, env_permutations in workflow.items():
+            workflow_permutations.setdefault(workflow_id, [])
+            for envs in env_permutations:
+                workflow_permutations[workflow_id].append(
+                    {
+                        "environments": [
+                            {"mapped_to": k, "value": v} for k, v in envs.items()
+                        ]
+                    }
                 )
 
     def get_workflow_ids():
@@ -54,6 +58,8 @@ def build_bitrise_payload(config, task, task_def):
                 ids.append(w)
             else:
                 ids.extend(w.keys())
+        ids = list(set(ids))  # Unique only
+        ids.sort()  # sorted to allow for proper unit testing
         return ids
 
     scope_prefix = config.graph_config["scriptworker"]["scope-prefix"]
@@ -102,8 +108,8 @@ def build_bitrise_payload(config, task, task_def):
             global_params["branch_dest_repo_owner"] = base_repository
 
     task_def["payload"] = {"global_params": global_params}
-    if workflow_params:
-        task_def["payload"]["workflow_params"] = workflow_params
+    if workflow_permutations:
+        task_def["payload"]["workflow_params"] = workflow_permutations
 
     if bitrise.get("artifact_prefix"):
         task_def["payload"]["artifact_prefix"] = bitrise["artifact_prefix"]

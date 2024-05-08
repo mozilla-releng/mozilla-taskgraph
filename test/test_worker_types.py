@@ -170,10 +170,30 @@ from mozilla_taskgraph import worker_types
                     "workflows": [
                         "foo",
                         {
-                            "bar": {
-                                "FOO": "bar",
-                                "PATH": {"artifact-reference": "<build/target.zip>"},
-                            }
+                            "bar": [
+                                {
+                                    "FOO": "bar",
+                                    "PATH": {
+                                        "artifact-reference": "<build/target.zip>"
+                                    },
+                                },
+                                {
+                                    "FOO": "notbar",
+                                    "PATH": {
+                                        "artifact-reference": "<build/target.zip>"
+                                    },
+                                },
+                            ]
+                        },
+                        {
+                            "bar": [
+                                {
+                                    "FOO": "bazzz",
+                                    "PATH": {
+                                        "artifact-reference": "<build/target.zip>"
+                                    },
+                                },
+                            ]
                         },
                     ],
                 }
@@ -187,23 +207,47 @@ from mozilla_taskgraph import worker_types
                         "commit_hash": "abcdef",
                     },
                     "workflow_params": {
-                        "bar": {
-                            "environments": [
-                                {"mapped_to": "FOO", "value": "bar"},
-                                {
-                                    "mapped_to": "PATH",
-                                    "value": {
-                                        "artifact-reference": "<build/target.zip>"
+                        "bar": [
+                            {
+                                "environments": [
+                                    {"mapped_to": "FOO", "value": "bar"},
+                                    {
+                                        "mapped_to": "PATH",
+                                        "value": {
+                                            "artifact-reference": "<build/target.zip>"
+                                        },
                                     },
-                                },
-                            ]
-                        }
+                                ]
+                            },
+                            {
+                                "environments": [
+                                    {"mapped_to": "FOO", "value": "notbar"},
+                                    {
+                                        "mapped_to": "PATH",
+                                        "value": {
+                                            "artifact-reference": "<build/target.zip>"
+                                        },
+                                    },
+                                ]
+                            },
+                            {
+                                "environments": [
+                                    {"mapped_to": "FOO", "value": "bazzz"},
+                                    {
+                                        "mapped_to": "PATH",
+                                        "value": {
+                                            "artifact-reference": "<build/target.zip>"
+                                        },
+                                    },
+                                ]
+                            },
+                        ]
                     },
                 },
                 "scopes": [
                     "foo:bitrise:app:some-app",
-                    "foo:bitrise:workflow:foo",
                     "foo:bitrise:workflow:bar",
+                    "foo:bitrise:workflow:foo",
                 ],
                 "tags": {"worker-implementation": "scriptworker"},
             },
