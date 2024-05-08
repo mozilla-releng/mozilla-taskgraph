@@ -1,3 +1,9 @@
+## 2.0.1 (2024-05-08)
+
+### Feat
+
+- **bitrise**: Add commit_message and pull_request_id to bitrise payloads
+
 ## 2.0.0 (2024-05-08)
 
 ### Feat
