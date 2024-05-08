@@ -80,24 +80,26 @@ def build_bitrise_payload(config, task, task_def):
         "branch_repo_owner": config.params["head_repository"],
     }
 
-    head_ref = normref(config.params["head_ref"])
-    head_tag = normref(config.params["head_tag"], type="tags")
-    base_ref = normref(config.params["base_ref"])
-
-    if head_ref:
+    if head_ref := normref(config.params["head_ref"]):
         global_params["branch"] = head_ref
 
-    if head_tag:
+    if head_tag := normref(config.params["head_tag"], type="tags"):
         global_params["tag"] = head_tag
+
+    if commit_message := config.params.get("commit_message"):
+        global_params["commit_message"] = commit_message
+
+    if pull_request_number := config.params.get("pull_request_number"):
+        global_params["pull_request_id"] = pull_request_number
 
     if config.params["tasks_for"] == "github-pull-request":
         global_params["pull_request_author"] = config.params["owner"]
 
-        if base_ref:
+        if base_ref := normref(config.params["base_ref"]):
             global_params["branch_dest"] = base_ref
 
-        if config.params["base_repository"]:
-            global_params["branch_dest_repo_owner"] = config.params["base_repository"]
+        if base_repository := config.params["base_repository"]:
+            global_params["branch_dest_repo_owner"] = base_repository
 
     task_def["payload"] = {"global_params": global_params}
     if workflow_params:
