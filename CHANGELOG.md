@@ -1,3 +1,9 @@
+## 2.0.0 (2024-05-08)
+
+### Feat
+
+- **bitrisescript**: Add global and workflow params
+
 ## 1.5.0 (2024-04-11)
 
 ### Feat
@@ -14,6 +20,7 @@
 
 ### Feat
 
+- **bitrise**: support an easier format for environment variables
 - **bitrise**: support an easier format for environment variables
 
 ## 1.3.2 (2024-04-02)
