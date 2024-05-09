@@ -1,3 +1,10 @@
+## 2.0.2 (2024-05-09)
+
+### Fix
+
+- **bitrise**: Properly handle bitrise payloads to allow permutations of same workflow
+- **version**: Fix version to 2.0.1
+
 ## 2.0.1 (2024-05-08)
 
 ### Feat
