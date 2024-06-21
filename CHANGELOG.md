@@ -1,15 +1,24 @@
+## 2.0.3 (2024-06-21)
+
+### Fix
+
+- declare support for Taskgraph 9.x
+
 ## 2.0.2 (2024-05-09)
 
 ### Fix
 
 - **bitrise**: Properly handle bitrise payloads to allow permutations of same workflow
-- **version**: Fix version to 2.0.1
 
 ## 2.0.1 (2024-05-08)
 
 ### Feat
 
 - **bitrise**: Add commit_message and pull_request_id to bitrise payloads
+
+### Fix
+
+- **version**: Fix version to 2.0.1
 
 ## 2.0.0 (2024-05-08)
 
