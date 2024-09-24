@@ -42,10 +42,16 @@ def make_task_description(config, tasks):
     if "shipit" in config.graph_config:
         shipit = config.graph_config["shipit"]
 
+    scriptworker = {}
+    if "scriptworker" in config.graph_config:
+        scriptworker = config.graph_config["scriptworker"]
+
     release_format = shipit.get(
         "release-format", "{product}-{version}-build{build_number}"
     )
-    scope_prefix = shipit.get("scope-prefix", "project:releng:ship-it")
+    scope_prefix = shipit.get(
+        "scope-prefix", f"{scriptworker.get('scope-prefix', 'project:releng')}:ship-it"
+    )
     shipit_server = "production" if config.params["level"] == "3" else "staging"
     version = config.params.get("version", "<ver>")
 
