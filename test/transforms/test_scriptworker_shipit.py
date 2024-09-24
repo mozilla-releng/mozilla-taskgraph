@@ -40,10 +40,17 @@ def assert_release_format(task):
     assert task["worker"]["release-name"] == "release-app-v1.2.3-b10"
 
 
-def assert_scope_prefix(task):
+def assert_scope_prefix_shipit(task):
     assert task["scopes"] == [
         "project:app:releng:action:mark-as-shipped",
         "project:app:releng:server:staging",
+    ]
+
+
+def assert_scope_prefix_scriptworker(task):
+    assert task["scopes"] == [
+        "project:app:releng:ship-it:action:mark-as-shipped",
+        "project:app:releng:ship-it:server:staging",
     ]
 
 
@@ -103,7 +110,16 @@ def assert_product_in_task_keyed_by(task):
             {"shipit": {"product": "app", "scope-prefix": "project:app:releng"}},
             {"level": "1"},
             {},
-            id="scope_prefix",
+            id="scope_prefix_shipit",
+        ),
+        pytest.param(
+            {
+                "shipit": {"product": "app"},
+                "scriptworker": {"scope-prefix": "project:app:releng"},
+            },
+            {"level": "1"},
+            {},
+            id="scope_prefix_scriptworker",
         ),
         pytest.param(
             {},
