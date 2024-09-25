@@ -22,7 +22,3 @@ RUN apt-get update && \
       unzip
 
 # %include-run-task
-
-# %include requirements/base.txt
-ADD topsrcdir/requirements/base.txt /builds/worker/base.txt
-RUN python3 -mpip install -r base.txt
