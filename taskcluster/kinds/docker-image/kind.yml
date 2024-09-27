@@ -7,7 +7,6 @@ transforms:
     - taskgraph.transforms.task:transforms
 
 tasks:
-    linux: {}
     fetch: {}
     python:
         args:
