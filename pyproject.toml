@@ -37,7 +37,6 @@ dev-dependencies = [
   "sphinx-book-theme",
   "sphinxcontrib-mermaid",
   "taskcluster_urls",
-  "tox",
 ]
 
 [build-system]
@@ -62,7 +61,6 @@ update_changelog_on_bump = true
 version_provider = "pep621"
 
 [tool.coverage.run]
-parallel = true
 branch = true
 source = ["src/mozilla_taskgraph/", "mozilla_taskgraph"]
 

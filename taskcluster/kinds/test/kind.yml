@@ -2,8 +2,9 @@
 loader: taskgraph.loader.transform:loader
 
 transforms:
-  - taskgraph.transforms.run:transforms
-  - taskgraph.transforms.task:transforms
+  - mt_taskgraph.transforms.test
+  - taskgraph.transforms.run
+  - taskgraph.transforms.task
 
 task-defaults:
   run:
@@ -20,14 +21,7 @@ tasks:
     description: "Run Python unit tests."
     attributes:
       artifact_prefix: public
-    worker:
-      artifacts:
-        - type: file
-          path: /builds/worker/artifacts/coverage.xml
-          name: public/coverage.xml
-      env:
-        COVERAGE_REPORT_COMMAND: "coverage xml -o /builds/worker/artifacts/coverage.xml"
-        TOX_PARALLEL_NO_SPINNER: "1"
+    python-versions: ["3.12", "3.11", "3.10", "3.9", "3.8"]
     run:
       command: >-
-          uv run tox --parallel
+        uv run coverage run --data-file $MOZ_ARTIFACT_DIR/coverage --context=py$UV_PYTHON -m pytest -vv
