@@ -1,5 +1,6 @@
 [project]
 name = "mozilla-taskgraph"
+version = "2.0.3"
 description = "Mozilla specific transforms and utilities for Taskgraph"
 authors = [
   { name = "Mozilla Release Engineering", email =  "release+mozilla-taskgraph@mozilla.com"}
@@ -19,7 +20,6 @@ requires-python = ">=3.8"
 dependencies = [
   "taskcluster-taskgraph>=5.4,<10",
 ]
-dynamic = ["version"]  # set in version.txt
 
 [project.urls]
 Repository = "https://github.com/mozilla-releng/mozilla-taskgraph"
@@ -42,9 +42,6 @@ dev-dependencies = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.metadata.hooks.custom]
-path = ".hatch_build.py"  # handles reading version from version.txt
 
 [tool.black]
 line-length = 88
