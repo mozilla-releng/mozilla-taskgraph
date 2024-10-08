@@ -1,6 +1,6 @@
 [project]
 name = "mozilla-taskgraph"
-version = "2.0.3"
+version = "2.1.0"
 description = "Mozilla specific transforms and utilities for Taskgraph"
 authors = [
   { name = "Mozilla Release Engineering", email =  "release+mozilla-taskgraph@mozilla.com"}

@@ -1,3 +1,9 @@
+## 2.1.0 (2024-10-08)
+
+### Feat
+
+- use 'scriptworker.scope-prefix' config for mark-as-shipped
+
 ## 2.0.3 (2024-06-21)
 
 ### Fix
