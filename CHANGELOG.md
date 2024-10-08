@@ -1,3 +1,14 @@
+## 3.0.0 (2024-10-08)
+
+### BREAKING CHANGE
+
+- Drops support for Taskgraph <11
+
+### Feat
+
+- support Taskgraph >11, <12
+- use 'scriptworker.scope-prefix' config for mark-as-shipped
+
 ## 2.0.3 (2024-06-21)
 
 ### Fix
