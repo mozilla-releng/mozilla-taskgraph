@@ -16,7 +16,7 @@ from mozilla_taskgraph.actions import make_action_available
     title="Release Promotion",
     symbol="${input.release_promotion_flavor}",
     description="Run a release promotion graph.",
-    generic=False,
+    permission="release-promotion",
     order=500,
     context=[],
     available=lambda _: True,
