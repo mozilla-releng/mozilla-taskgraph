@@ -1,3 +1,9 @@
+## 3.0.1 (2024-10-25)
+
+### Fix
+
+- declare support for Taskgraph 12.x
+
 ## 3.0.0 (2024-10-08)
 
 ### BREAKING CHANGE
