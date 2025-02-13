@@ -1,0 +1,32 @@
+---
+loader: taskgraph.loader.transform:loader
+
+transforms:
+  - taskgraph.transforms.task_context
+  - taskgraph.transforms.run
+  - taskgraph.transforms.task
+
+task-defaults:
+  run:
+    using: run-task
+    cwd: "{checkout}"
+    cache-dotcache: true
+
+  worker-type: linux
+  worker:
+    docker-image: {in-tree: python}
+    max-run-time: 600
+
+tasks:
+  conventional-commit:
+    description: "Verify commit messages follow conventional commits."
+    task-context:
+      from-parameters:
+        base: base_rev
+        head: head_rev
+      substitution-fields:
+        - run.command
+    run:
+      command: >-
+        uv run cz check --rev-range {base}..{head} ||
+        (echo "Commit format:" && uv run cz schema && exit 1)

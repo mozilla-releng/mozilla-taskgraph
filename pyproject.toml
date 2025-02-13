@@ -28,6 +28,7 @@ Issues = "https://github.com/mozilla-releng/mozilla-taskgraph/issues"
 
 [tool.uv]
 dev-dependencies = [
+  "commitizen",
   "coverage",
   "pytest",
   "pytest-mock",
