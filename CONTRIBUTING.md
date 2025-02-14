@@ -90,7 +90,12 @@ git show
 ```
 
 Verify the commit is what you expect, then create a pull request and get the
-commit merged into `main`. Once merged, push your tag upstream:
+commit merged into `main`.
+
+If you merge the pull request using the `squash` method, recreate the tag after
+pulling to make sure it points to the same commit as the one on main.
+
+Then, push your tag upstream:
 
 ```
 git push upstream --tags
