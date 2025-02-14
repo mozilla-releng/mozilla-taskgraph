@@ -1,3 +1,9 @@
+## 3.0.3 (2025-02-14)
+
+### Fix
+
+- Fix the previous release so it points to a commit on main
+
 ## 3.0.2 (2025-02-14)
 
 ### Fix
