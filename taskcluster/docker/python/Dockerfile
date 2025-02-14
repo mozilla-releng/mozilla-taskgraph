@@ -6,7 +6,7 @@ FROM debian:12-slim
 LABEL maintainer="Mozilla Release Engineering <release+mozilla-taskgraph@mozilla.com>"
 
 VOLUME /builds/worker/checkouts
-VOLUME /builds/worker/.cache
+VOLUME /builds/worker/.task-cache/uv
 
 # Add worker user
 RUN mkdir -p /builds && \
