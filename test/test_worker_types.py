@@ -333,3 +333,136 @@ def test_build_shipit_payload(build_payload):
         "payload": {"release_name": "foo"},
         "tags": {"worker-implementation": "scriptworker"},
     }
+
+
+def test_build_signing_payload_invalid(build_payload):
+    worker = {}
+    build_payload("scriptworker-signing", worker=worker, raises=Exception)
+
+    worker["signing-type"] = "release"
+    build_payload("scriptworker-signing", worker=worker, raises=Exception)
+
+    ua = worker["upstream-artifacts"] = [
+        {
+            "taskId": "abc",
+            "taskType": "build",
+            "paths": ["foo/bar", "test.dmg"],
+            "formats": ["gpg", "gcp_prod_autograph_gpg"],
+        }
+    ]
+    for key in ("taskId", "taskType", "paths", "formats"):
+        val = ua[0].pop(key)
+        build_payload("scriptworker-signing", worker=worker, raises=Exception)
+        ua[0][key] = val
+
+
+def test_build_signing_payload_basic(build_payload):
+    worker = {
+        "signing-type": "release",
+        "upstream-artifacts": [
+            {
+                "taskId": "abc",
+                "taskType": "build",
+                "paths": ["foo/bar"],
+                "formats": ["gpg"],
+            }
+        ],
+    }
+    task, task_def = build_payload("scriptworker-signing", worker=worker)
+    assert task_def == {
+        "payload": {
+            "upstreamArtifacts": [
+                {
+                    "formats": ["gpg"],
+                    "paths": ["foo/bar"],
+                    "taskId": "abc",
+                    "taskType": "build",
+                }
+            ],
+        },
+        "scopes": [
+            "foo:signing:cert:release",
+            "foo:signing:format:gpg",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+    assert task["attributes"] == {
+        "release_artifacts": [
+            "foo/bar",
+        ]
+    }
+
+
+def test_build_signing_payload_dmg(build_payload):
+    worker = {
+        "max-run-time": 3600,
+        "signing-type": "release",
+        "upstream-artifacts": [
+            {
+                "taskId": "abc",
+                "taskType": "build",
+                "paths": ["test.dmg"],
+                "formats": ["gpg"],
+            }
+        ],
+    }
+    task, task_def = build_payload("scriptworker-signing", worker=worker)
+    assert task_def == {
+        "payload": {
+            "maxRunTime": 3600,
+            "upstreamArtifacts": [
+                {
+                    "formats": ["gpg"],
+                    "paths": ["test.dmg"],
+                    "taskId": "abc",
+                    "taskType": "build",
+                }
+            ],
+        },
+        "scopes": [
+            "foo:signing:cert:release",
+            "foo:signing:format:gpg",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+    assert task["attributes"] == {"release_artifacts": ["test.tar.gz"]}
+
+
+def test_build_signing_payload_gpg_asc(build_payload):
+    worker = {
+        "max-run-time": 3600,
+        "signing-type": "release",
+        "upstream-artifacts": [
+            {
+                "taskId": "abc",
+                "taskType": "build",
+                "paths": ["foo/bar"],
+                "formats": ["gcp_prod_autograph_gpg"],
+            }
+        ],
+    }
+    task, task_def = build_payload("scriptworker-signing", worker=worker)
+    assert task_def == {
+        "payload": {
+            "maxRunTime": 3600,
+            "upstreamArtifacts": [
+                {
+                    "formats": ["gcp_prod_autograph_gpg"],
+                    "paths": ["foo/bar"],
+                    "taskId": "abc",
+                    "taskType": "build",
+                }
+            ],
+        },
+        "scopes": [
+            "foo:signing:cert:release",
+            "foo:signing:format:gcp_prod_autograph_gpg",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+    assert task["attributes"] == {
+        "release_artifacts": [
+            "foo/bar",
+            "foo/bar.asc",
+        ]
+    }

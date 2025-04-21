@@ -1,6 +1,8 @@
 from taskgraph.transforms.task import payload_builder, taskref_or_string
 from voluptuous import Any, Extra, Optional, Required
 
+from mozilla_taskgraph.util.signed_artifacts import get_signed_artifacts
+
 
 @payload_builder(
     "scriptworker-bitrise",
@@ -125,3 +127,60 @@ def build_shipit_payload(config, task, task_def):
     worker = task["worker"]
     task_def["tags"]["worker-implementation"] = "scriptworker"
     task_def["payload"] = {"release_name": worker["release-name"]}
+
+
+@payload_builder(
+    "scriptworker-signing",
+    schema={
+        Required("signing-type"): str,
+        # list of artifact URLs for the artifacts that should be signed
+        Required("upstream-artifacts"): [
+            {
+                # taskId of the task with the artifact
+                Required("taskId"): taskref_or_string,
+                # type of signing task (for CoT)
+                Required("taskType"): str,
+                # Paths to the artifacts to sign
+                Required("paths"): [str],
+                # Signing formats to use on each of the paths
+                Required("formats"): [str],
+                # Only For MSI, optional for the signed Installer
+                Optional("authenticode_comment"): str,
+            }
+        ],
+        Optional("max-run-time"): int,
+    },
+)
+def build_signing_payload(config, task, task_def):
+    worker = task["worker"]
+
+    task_def["payload"] = {
+        "upstreamArtifacts": worker["upstream-artifacts"],
+    }
+    if "max-run-time" in worker:
+        task_def["payload"]["maxRunTime"] = worker["max-run-time"]
+
+    task_def.setdefault("tags", {})["worker-implementation"] = "scriptworker"
+
+    formats = set()
+    for artifacts in worker["upstream-artifacts"]:
+        formats.update(artifacts["formats"])
+
+    scope_prefix = config.graph_config["scriptworker"]["scope-prefix"]
+    scopes = set(task_def.get("scopes", []))
+    scopes.add(f"{scope_prefix}:signing:cert:{worker['signing-type']}")
+    scopes.update({f"{scope_prefix}:signing:format:{format}" for format in formats})
+
+    task_def["scopes"] = sorted(scopes)
+
+    # Set release artifacts
+    artifacts = set(task.setdefault("attributes", {}).get("release_artifacts", []))
+    for upstream_artifact in worker["upstream-artifacts"]:
+        for path in upstream_artifact["paths"]:
+            artifacts.update(
+                get_signed_artifacts(
+                    input=path,
+                    formats=upstream_artifact["formats"],
+                )
+            )
+    task["attributes"]["release_artifacts"] = sorted(list(artifacts))
