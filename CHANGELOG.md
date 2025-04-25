@@ -1,3 +1,9 @@
+## 3.1.0 (2025-04-25)
+
+### Feat
+
+- add a scriptworker-signing payload builder
+
 ## 3.0.4 (2025-04-11)
 
 ### Fix
