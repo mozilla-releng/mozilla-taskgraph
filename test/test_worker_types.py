@@ -382,7 +382,6 @@ def test_build_signing_payload_basic(build_payload):
         },
         "scopes": [
             "foo:signing:cert:release",
-            "foo:signing:format:gpg",
         ],
         "tags": {"worker-implementation": "scriptworker"},
     }
@@ -421,7 +420,6 @@ def test_build_signing_payload_dmg(build_payload):
         },
         "scopes": [
             "foo:signing:cert:release",
-            "foo:signing:format:gpg",
         ],
         "tags": {"worker-implementation": "scriptworker"},
     }
@@ -456,7 +454,6 @@ def test_build_signing_payload_gpg_asc(build_payload):
         },
         "scopes": [
             "foo:signing:cert:release",
-            "foo:signing:format:gcp_prod_autograph_gpg",
         ],
         "tags": {"worker-implementation": "scriptworker"},
     }
