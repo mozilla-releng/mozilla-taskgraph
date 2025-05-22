@@ -169,7 +169,6 @@ def build_signing_payload(config, task, task_def):
     scope_prefix = config.graph_config["scriptworker"]["scope-prefix"]
     scopes = set(task_def.get("scopes", []))
     scopes.add(f"{scope_prefix}:signing:cert:{worker['signing-type']}")
-    scopes.update({f"{scope_prefix}:signing:format:{format}" for format in formats})
 
     task_def["scopes"] = sorted(scopes)
 
