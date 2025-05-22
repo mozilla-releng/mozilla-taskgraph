@@ -10,6 +10,8 @@ def get_signed_artifacts(input, formats, behavior=None):
     artifacts = set()
     if input.endswith(".dmg"):
         artifacts.add(input.replace(".dmg", ".tar.gz"))
+        if behavior and behavior != "mac_sign":
+            artifacts.add(input.replace(".dmg", ".pkg"))
     else:
         artifacts.add(input)
 
