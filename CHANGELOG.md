@@ -1,3 +1,9 @@
+## 3.1.2 (2025-05-22)
+
+### Fix
+
+- add missing mac signed_artifacts
+
 ## 3.1.1 (2025-05-22)
 
 ### Fix
