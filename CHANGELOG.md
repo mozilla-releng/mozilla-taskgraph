@@ -1,3 +1,9 @@
+## 3.1.1 (2025-05-22)
+
+### Fix
+
+- stop adding format scopes in scriptworker-signing payload builder
+
 ## 3.1.0 (2025-04-25)
 
 ### Feat
