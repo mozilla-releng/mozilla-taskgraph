@@ -183,3 +183,205 @@ def build_signing_payload(config, task, task_def):
                 )
             )
     task["attributes"]["release_artifacts"] = sorted(list(artifacts))
+
+
+@payload_builder(
+    "scriptworker-landoscript",
+    schema={
+        Required("lando-repo"): str,
+        Optional("hg-repo-url"): str,
+        Optional("ignore-closed-tree"): bool,
+        Optional("dontbuild"): bool,
+        Optional("tags"): [Any("buildN", "release", None)],
+        Optional("force-dry-run"): bool,
+        Optional("android-l10n-import-info"): {
+            Required("from-repo-url"): str,
+            Required("toml-info"): [
+                {
+                    Required("toml-path"): str,
+                    Required("dest-path"): str,
+                }
+            ],
+        },
+        Optional("android-l10n-sync-info"): {
+            Required("from-branch"): str,
+            Required("toml-info"): [
+                {
+                    Required("toml-path"): str,
+                }
+            ],
+        },
+        Optional("l10n-bump-info"): [
+            {
+                Required("name"): str,
+                Required("path"): str,
+                Optional("l10n-repo-url"): str,
+                Optional("l10n-repo-target-branch"): str,
+                Optional("ignore-config"): object,
+                Required("platform-configs"): [
+                    {
+                        Required("platforms"): [str],
+                        Required("path"): str,
+                        Optional("format"): str,
+                    }
+                ],
+            }
+        ],
+        Optional("bump-files"): [str],
+        Optional("merge-info"): object,
+    },
+)
+def build_landoscript_payload(config, task, task_def):
+    worker = task["worker"]
+    release_config = get_release_config(config)
+    task_def["payload"] = {"actions": [], "lando_repo": worker["lando-repo"]}
+    actions = task_def["payload"]["actions"]
+
+    if worker.get("ignore-closed-tree") is not None:
+        task_def["payload"]["ignore_closed_tree"] = worker["ignore-closed-tree"]
+
+    if worker.get("dontbuild"):
+        task_def["payload"]["dontbuild"] = True
+
+    if worker.get("force-dry-run"):
+        task_def["payload"]["dry_run"] = True
+
+    if worker.get("android-l10n-import-info"):
+        android_l10n_import_info = {}
+        for k, v in worker["android-l10n-import-info"].items():
+            android_l10n_import_info[k.replace("-", "_")] = worker[
+                "android-l10n-import-info"
+            ][k]
+        android_l10n_import_info["toml_info"] = [
+            {
+                param_name.replace("-", "_"): param_value
+                for param_name, param_value in entry.items()
+            }
+            for entry in worker["android-l10n-import-info"]["toml-info"]
+        ]
+        task_def["payload"]["android_l10n_import_info"] = android_l10n_import_info
+        actions.append("android_l10n_import")
+
+    if worker.get("android-l10n-sync-info"):
+        android_l10n_sync_info = {}
+        for k, v in worker["android-l10n-sync-info"].items():
+            android_l10n_sync_info[k.replace("-", "_")] = worker[
+                "android-l10n-sync-info"
+            ][k]
+        android_l10n_sync_info["toml_info"] = [
+            {
+                param_name.replace("-", "_"): param_value
+                for param_name, param_value in entry.items()
+            }
+            for entry in worker["android-l10n-sync-info"]["toml-info"]
+        ]
+        task_def["payload"]["android_l10n_sync_info"] = android_l10n_sync_info
+        actions.append("android_l10n_sync")
+
+    if worker.get("l10n-bump-info"):
+        l10n_bump_info = []
+        l10n_repo_urls = set()
+        for lbi in worker["l10n-bump-info"]:
+            new_lbi = {}
+            if "l10n-repo-url" in lbi:
+                l10n_repo_urls.add(lbi["l10n-repo-url"])
+            for k, v in lbi.items():
+                new_lbi[k.replace("-", "_")] = lbi[k]
+            l10n_bump_info.append(new_lbi)
+
+        task_def["payload"]["l10n_bump_info"] = l10n_bump_info
+        if len(l10n_repo_urls) > 1:
+            raise Exception(
+                "Must use the same l10n-repo-url for all files in the same task!"
+            )
+        elif len(l10n_repo_urls) == 1:
+            actions.append("l10n_bump")
+
+    if worker.get("tags"):
+        tag_names = []
+        product = task["shipping-product"].upper()
+        version = release_config["version"].replace(".", "_")
+        buildnum = release_config["build_number"]
+        if "buildN" in worker["tags"]:
+            tag_names.extend(
+                [
+                    f"{product}_{version}_BUILD{buildnum}",
+                ]
+            )
+        if "release" in worker["tags"]:
+            tag_names.extend([f"{product}_{version}_RELEASE"])
+        tag_info = {
+            "tags": tag_names,
+            "hg_repo_url": worker["hg-repo-url"],
+            "revision": config.params[
+                "{}head_rev".format(worker.get("repo-param-prefix", ""))
+            ],
+        }
+        task_def["payload"]["tag_info"] = tag_info
+        actions.append("tag")
+
+    if worker.get("bump-files"):
+        bump_info = {}
+        bump_info["next_version"] = release_config["next_version"]
+        bump_info["files"] = worker["bump-files"]
+        task_def["payload"]["version_bump_info"] = bump_info
+        actions.append("version_bump")
+
+    if worker.get("merge-info"):
+        merge_info = {
+            merge_param_name.replace("-", "_"): merge_param_value
+            for merge_param_name, merge_param_value in worker["merge-info"].items()
+            if merge_param_name != "version-files"
+        }
+        merge_info["version_files"] = [
+            {
+                file_param_name.replace("-", "_"): file_param_value
+                for file_param_name, file_param_value in file_entry.items()
+            }
+            for file_entry in worker["merge-info"]["version-files"]
+        ]
+        # hack alert: co-opt the l10n_bump_info into the merge_info section
+        # this should be cleaned up to avoid l10n_bump_info ever existing
+        # in the payload
+        if task_def["payload"].get("l10n_bump_info"):
+            actions.remove("l10n_bump")
+            merge_info["l10n_bump_info"] = task_def["payload"].pop("l10n_bump_info")
+
+        task_def["payload"]["merge_info"] = merge_info
+        actions.append("merge_day")
+
+    scopes = set(task_def.get("scopes", []))
+    scopes.add(f"project:releng:lando:repo:{worker['lando-repo']}")
+    scopes.update([f"project:releng:lando:action:{action}" for action in actions])
+    task_def["scopes"] = sorted(scopes)
+
+
+def get_release_config(config):
+    """Get the build number and version for a release task.
+
+    Currently only applies to beetmover tasks.
+
+    Args:
+        config (TransformConfig): The configuration for the kind being transformed.
+
+    Returns:
+        dict: containing both `build_number` and `version`.  This can be used to
+            update `task.payload`.
+    """
+    release_config = {
+        "version": config.params["version"],
+        "appVersion": config.params["app_version"],
+        "next_version": config.params["next_version"],
+        "build_number": config.params["build_number"],
+    }
+    if pv := config.params.get("partial_versions") and config.kind in (
+            "release-bouncer-sub",
+            "release-bouncer-check",
+            "release-update-verify-config",
+            "release-secondary-update-verify-config",
+            "release-balrog-submit-toplevel",
+            "release-secondary-balrog-submit-toplevel",
+        ):
+        release_config["partial_versions"] = pv
+
+    return release_config
