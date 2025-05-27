@@ -369,20 +369,9 @@ def get_release_config(config):
         dict: containing both `build_number` and `version`.  This can be used to
             update `task.payload`.
     """
-    release_config = {
+    return {
         "version": config.params["version"],
         "appVersion": config.params["app_version"],
         "next_version": config.params["next_version"],
         "build_number": config.params["build_number"],
     }
-    if pv := config.params.get("partial_versions") and config.kind in (
-        "release-bouncer-sub",
-        "release-bouncer-check",
-        "release-update-verify-config",
-        "release-secondary-update-verify-config",
-        "release-balrog-submit-toplevel",
-        "release-secondary-balrog-submit-toplevel",
-    ):
-        release_config["partial_versions"] = pv
-
-    return release_config
