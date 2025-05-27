@@ -12,7 +12,7 @@ import mozilla_taskgraph.worker_types  # noqa - trigger payload_builder registra
 @pytest.fixture
 def build_payload(make_graph_config, make_transform_config, parameters):
     graph_config = make_graph_config(
-        extra_config={"scriptworker": {"scope-prefix": "foo"}}
+        extra_config={"scriptworker": {"scope-prefix": "foo"}},
     )
 
     def inner(
@@ -25,7 +25,7 @@ def build_payload(make_graph_config, make_transform_config, parameters):
 
         worker.setdefault("implementation", name)
 
-        task = {"worker": worker}
+        task = {"worker": worker, "shipping-product": "product"}
         task_def = {"tags": {}}
 
         parameters.update(extra_params)
@@ -462,4 +462,297 @@ def test_build_signing_payload_gpg_asc(build_payload):
             "foo/bar",
             "foo/bar.asc",
         ]
+    }
+
+
+def test_lando_android_l10n_import(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "android-l10n-import-info": {
+            "from-repo-url": "https://from",
+            "toml-info": [
+                {
+                    "toml-path": "foo/bar/l10n.toml",
+                    "dest-path": "foo-bar",
+                }
+            ],
+        },
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["android_l10n_import"],
+            "lando_repo": "testrepo",
+            "android_l10n_import_info": {
+                "from_repo_url": "https://from",
+                "toml_info": [
+                    {"toml_path": "foo/bar/l10n.toml", "dest_path": "foo-bar"},
+                ],
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:android_l10n_import",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_android_l10n_sync(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "android-l10n-sync-info": {
+            "from-branch": "branchy",
+            "toml-info": [
+                {
+                    "toml-path": "foo/bar/l10n.toml",
+                }
+            ],
+        },
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["android_l10n_sync"],
+            "lando_repo": "testrepo",
+            "android_l10n_sync_info": {
+                "from_branch": "branchy",
+                "toml_info": [
+                    {
+                        "toml_path": "foo/bar/l10n.toml",
+                    },
+                ],
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:android_l10n_sync",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_l10n_bump(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "dontbuild": True,
+        "ignore-closed-tree": True,
+        "l10n-bump-info": [
+            {
+                "name": "l10n",
+                "path": "foo/bar/changesets.json",
+                "l10n-repo-url": "https://l10n",
+                "l10n-repo-target-branch": "branchy",
+                "ignore-config": {"ab": ["foo"]},
+                "platform-configs": [
+                    {
+                        "platforms": ["p1", "p2"],
+                        "path": "foo/bar/locales",
+                    },
+                ],
+            }
+        ],
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["l10n_bump"],
+            "lando_repo": "testrepo",
+            "dontbuild": True,
+            "ignore_closed_tree": True,
+            "l10n_bump_info": [
+                {
+                    "name": "l10n",
+                    "path": "foo/bar/changesets.json",
+                    "l10n_repo_url": "https://l10n",
+                    "l10n_repo_target_branch": "branchy",
+                    "ignore_config": {
+                        "ab": ["foo"],
+                    },
+                    "platform_configs": [
+                        {
+                            "platforms": ["p1", "p2"],
+                            "path": "foo/bar/locales",
+                        },
+                    ],
+                }
+            ],
+        },
+        "scopes": [
+            "project:releng:lando:action:l10n_bump",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_tag(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "tags": ["buildN", "release"],
+        "hg-repo-url": "https://hg/repo",
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["tag"],
+            "lando_repo": "testrepo",
+            "tag_info": {
+                "hg_repo_url": "https://hg/repo",
+                "revision": "abcdef",
+                "tags": [
+                    "PRODUCT_99_0_BUILD1",
+                    "PRODUCT_99_0_RELEASE",
+                ],
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:tag",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_version_bump(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "bump-files": [
+            "foo/bar/a.txt",
+            "another/file.txt",
+        ],
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["version_bump"],
+            "lando_repo": "testrepo",
+            "version_bump_info": {
+                "files": [
+                    "foo/bar/a.txt",
+                    "another/file.txt",
+                ],
+                "next_version": "100.0",
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:version_bump",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_merge(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "dontbuild": False,
+        "l10n-bump-info": [
+            {
+                "name": "l10n",
+                "path": "foo/bar/changesets.json",
+                "l10n-repo-url": "https://l10n",
+                "l10n-repo-target-branch": "branchy",
+                "ignore-config": {"ab": ["foo"]},
+                "platform-configs": [
+                    {
+                        "platforms": ["p1", "p2"],
+                        "path": "foo/bar/locales",
+                    },
+                ],
+            }
+        ],
+        "merge-info": {
+            "fetch-version-from": "version.txt",
+            "version-files": [
+                {
+                    "filename": "version.txt",
+                    "new-suffix": "",
+                },
+                {
+                    "filename": "other.txt",
+                    "new-suffix": "b1",
+                },
+            ],
+            "replacements": [
+                [
+                    "something.txt",
+                    "foo",
+                    "bar",
+                ]
+            ],
+            "regex-replacements": [
+                [
+                    "somethingelse.txt",
+                    "thing[0-9]+.0",
+                    "bar{next_major_version}.0",
+                ]
+            ],
+            "merge-old-head": True,
+            "base-tag": "{major_version}_BASE",
+            "end-tag": "{major_version}_END",
+            "from-branch": "from-b",
+            "to-branch": "to-b",
+        },
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["merge_day"],
+            "lando_repo": "testrepo",
+            "merge_info": {
+                "fetch_version_from": "version.txt",
+                "version_files": [
+                    {
+                        "filename": "version.txt",
+                        "new_suffix": "",
+                    },
+                    {
+                        "filename": "other.txt",
+                        "new_suffix": "b1",
+                    },
+                ],
+                "replacements": [
+                    [
+                        "something.txt",
+                        "foo",
+                        "bar",
+                    ]
+                ],
+                "regex_replacements": [
+                    [
+                        "somethingelse.txt",
+                        "thing[0-9]+.0",
+                        "bar{next_major_version}.0",
+                    ]
+                ],
+                "merge_old_head": True,
+                "base_tag": "{major_version}_BASE",
+                "end_tag": "{major_version}_END",
+                "from_branch": "from-b",
+                "to_branch": "to-b",
+                "l10n_bump_info": [
+                    {
+                        "name": "l10n",
+                        "path": "foo/bar/changesets.json",
+                        "l10n_repo_url": "https://l10n",
+                        "l10n_repo_target_branch": "branchy",
+                        "ignore_config": {
+                            "ab": ["foo"],
+                        },
+                        "platform_configs": [
+                            {
+                                "platforms": ["p1", "p2"],
+                                "path": "foo/bar/locales",
+                            },
+                        ],
+                    }
+                ],
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:merge_day",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
     }

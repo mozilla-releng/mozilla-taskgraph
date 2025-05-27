@@ -74,6 +74,7 @@ class FakeParameters(dict):
 def parameters():
     return FakeParameters(
         {
+            "app_version": "99.0",
             "base_ref": "123456",
             "base_repository": "http://example.com/base/repo",
             "build_date": 0,
@@ -85,7 +86,7 @@ def parameters():
             "head_tag": "",
             "level": "1",
             "moz_build_date": 0,
-            "next_version": "1.0.1",
+            "next_version": "100.0",
             "owner": "some-owner",
             "project": "some-project",
             "pushlog_id": 1,
@@ -93,7 +94,7 @@ def parameters():
             "target_tasks_method": "test_method",
             "tasks_for": "hg-push",
             "try_mode": None,
-            "version": "",
+            "version": "99.0",
         }
     )
 

@@ -186,7 +186,7 @@ def build_signing_payload(config, task, task_def):
 
 
 @payload_builder(
-    "scriptworker-landoscript",
+    "scriptworker-lando",
     schema={
         Required("lando-repo"): str,
         Optional("hg-repo-url"): str,
@@ -231,10 +231,11 @@ def build_signing_payload(config, task, task_def):
         Optional("merge-info"): object,
     },
 )
-def build_landoscript_payload(config, task, task_def):
+def build_lando_payload(config, task, task_def):
     worker = task["worker"]
     release_config = get_release_config(config)
     task_def["payload"] = {"actions": [], "lando_repo": worker["lando-repo"]}
+    task_def["tags"]["worker-implementation"] = "scriptworker"
     actions = task_def["payload"]["actions"]
 
     if worker.get("ignore-closed-tree") is not None:
@@ -375,13 +376,13 @@ def get_release_config(config):
         "build_number": config.params["build_number"],
     }
     if pv := config.params.get("partial_versions") and config.kind in (
-            "release-bouncer-sub",
-            "release-bouncer-check",
-            "release-update-verify-config",
-            "release-secondary-update-verify-config",
-            "release-balrog-submit-toplevel",
-            "release-secondary-balrog-submit-toplevel",
-        ):
+        "release-bouncer-sub",
+        "release-bouncer-check",
+        "release-update-verify-config",
+        "release-secondary-update-verify-config",
+        "release-balrog-submit-toplevel",
+        "release-secondary-balrog-submit-toplevel",
+    ):
         release_config["partial_versions"] = pv
 
     return release_config
