@@ -1115,3 +1115,69 @@ def test_lando_merge_beta_to_release(build_payload):
         ],
         "tags": {"worker-implementation": "scriptworker"},
     }
+
+
+def test_beetmover_upload_data(build_payload):
+    worker = {
+        "bucket": "testbucket",
+        "app-name": "testapp",
+        "project": "testproject",
+        "data-map": [
+            {
+                "data": "c29tZSB0ZXN0IGRhdGE=",
+                "content-type": "text/plain",
+                "destinations": [
+                    "foo.txt",
+                    "bar.txt",
+                ],
+            },
+        ],
+    }
+    _, task_def = build_payload("scriptworker-beetmover-data", worker=worker)
+    assert task_def == {
+        "payload": {
+            "releaseProperties": {
+                "appName": "testapp",
+            },
+            "dataMap": [
+                {
+                    "data": "c29tZSB0ZXN0IGRhdGE=",
+                    "contentType": "text/plain",
+                    "destinations": [
+                        "foo.txt",
+                        "bar.txt",
+                    ],
+                },
+            ],
+        },
+        "scopes": [
+            "project:testproject:releng:beetmover:bucket:testbucket",
+            "project:testproject:releng:beetmover:action:upload-data",
+        ],
+        "tags": {
+            "worker-implementation": "scriptworker",
+        },
+    }
+
+
+def test_beetmover_upload_data_bad_encoding(build_payload):
+    worker = {
+        "bucket": "testbucket",
+        "app-name": "testapp",
+        "project": "testproject",
+        "data-map": [
+            {
+                "data": "aaaaa",
+                "content-type": "text/plain",
+                "destinations": [
+                    "foo.txt",
+                    "bar.txt",
+                ],
+            },
+        ],
+    }
+    try:
+        build_payload("scriptworker-beetmover-data", worker=worker)
+        assert False, "should've raised an exception"
+    except Exception as e:
+        assert "data must be base64 encoded" in e.args[0]
