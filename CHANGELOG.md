@@ -1,3 +1,9 @@
+## 3.2.0 (2025-06-03)
+
+### Added
+
+- landoscript payload builder (#98)
+
 ## 3.1.2 (2025-05-22)
 
 ### Fix
