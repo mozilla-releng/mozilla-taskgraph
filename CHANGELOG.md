@@ -1,3 +1,9 @@
+## 3.3.0 (2025-06-05)
+
+### Added
+
+- beetmover-upload-data payload builder (#102)
+
 ## 3.2.0 (2025-06-03)
 
 ### Added
