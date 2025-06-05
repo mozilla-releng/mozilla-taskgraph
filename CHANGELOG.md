@@ -1,3 +1,9 @@
+## 3.3.1 (2025-06-05)
+
+### Fixed
+
+- allow taskref's in beetmover-data destinations (#104)
+
 ## 3.3.0 (2025-06-05)
 
 ### Added
