@@ -1129,6 +1129,7 @@ def test_beetmover_upload_data(build_payload):
                 "destinations": [
                     "foo.txt",
                     "bar.txt",
+                    {"task-reference": "<foo>"},
                 ],
             },
         ],
@@ -1146,6 +1147,7 @@ def test_beetmover_upload_data(build_payload):
                     "destinations": [
                         "foo.txt",
                         "bar.txt",
+                        {"task-reference": "<foo>"},
                     ],
                 },
             ],
