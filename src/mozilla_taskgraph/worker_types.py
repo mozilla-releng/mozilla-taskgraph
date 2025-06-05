@@ -1,3 +1,6 @@
+import binascii
+from base64 import b64decode
+
 from taskgraph.transforms.task import payload_builder, taskref_or_string
 from voluptuous import Any, Extra, Optional, Required
 
@@ -463,3 +466,54 @@ def dash_to_underscore(obj):
     for k, v in obj.items():
         new_obj[k.replace("-", "_")] = v
     return new_obj
+
+
+@payload_builder(
+    "scriptworker-beetmover-data",
+    schema={
+        Required("app-name"): str,
+        Required("bucket"): str,
+        Required("project"): str,
+        Required("data-map"): [
+            {
+                Required("data"): str,
+                Required("content-type"): str,
+                Required("destinations"): [str],
+            },
+        ],
+        Optional("dry-run"): bool,
+    },
+)
+def build_beetmover_data_payload(_, task, task_def):
+    worker = task["worker"]
+    task_def["tags"]["worker-implementation"] = "scriptworker"
+
+    task_def["payload"] = {
+        "releaseProperties": {
+            "appName": worker["app-name"],
+        },
+        "dataMap": [],
+    }
+
+    for dataMap in worker["data-map"]:
+        data = dataMap["data"]
+        try:
+            b64decode(data)
+        except binascii.Error:
+            raise Exception(f"data must be base64 encoded! data was: {data}")
+
+        task_def["payload"]["dataMap"].append(
+            {
+                "data": data,
+                "contentType": dataMap["content-type"],
+                "destinations": dataMap["destinations"],
+            }
+        )
+
+    scopes = task_def.setdefault("scopes", [])
+    scopes.extend(
+        [
+            f"project:{worker['project']}:releng:beetmover:bucket:{worker['bucket']}",
+            f"project:{worker['project']}:releng:beetmover:action:upload-data",
+        ]
+    )
