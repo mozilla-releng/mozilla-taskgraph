@@ -907,6 +907,7 @@ def test_lando_merge_early_to_late_beta(build_payload):
                         ]
                     ],
                     "to-branch": "to-b",
+                    "fetch-version-from": "foo/bar.txt",
                 }
             }
         ],
@@ -925,6 +926,7 @@ def test_lando_merge_early_to_late_beta(build_payload):
                     ]
                 ],
                 "to_branch": "to-b",
+                "fetch_version_from": "foo/bar.txt",
             },
         },
         "scopes": [
