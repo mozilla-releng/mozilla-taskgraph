@@ -1,3 +1,9 @@
+## 3.3.2 (2025-06-16)
+
+### Fixed
+
+- require `fetch-version-from` for `early-to-late-beta` (#106)
+
 ## 3.3.1 (2025-06-05)
 
 ### Fixed
