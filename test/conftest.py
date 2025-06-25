@@ -26,7 +26,7 @@ def set_taskcluster_url(session_mocker):
 
 @pytest.fixture
 def responses():
-    with RequestsMock() as rsps:
+    with RequestsMock(assert_all_requests_are_fired=True) as rsps:
         yield rsps
 
 
