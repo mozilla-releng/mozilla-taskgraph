@@ -1,6 +1,6 @@
 [project]
 name = "mozilla-taskgraph"
-version = "3.3.2"
+version = "3.4.0"
 description = "Mozilla specific transforms and utilities for Taskgraph"
 readme = "README.md"
 authors = [

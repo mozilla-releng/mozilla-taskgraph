@@ -1,3 +1,9 @@
+## 3.4.0 (2025-07-15)
+
+### Feat
+
+- add transforms for cross trust domain integration tests
+
 ## 3.3.2 (2025-06-16)
 
 ### Fixed
