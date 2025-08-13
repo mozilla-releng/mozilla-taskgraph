@@ -1,3 +1,9 @@
+## 3.4.1 (2025-08-13)
+
+## Added
+
+- mark as compatible with taskcluster-taskgraph 15
+
 ## 3.4.0 (2025-07-15)
 
 ### Feat

@@ -567,7 +567,7 @@ wheels = [
 
 [[package]]
 name = "mozilla-taskgraph"
-version = "3.4.0"
+version = "3.4.1"
 source = { editable = "." }
 dependencies = [
     { name = "taskcluster-taskgraph" },
@@ -590,7 +590,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "taskcluster-taskgraph", specifier = ">=11,<15" }]
+requires-dist = [{ name = "taskcluster-taskgraph", specifier = ">=11,<16" }]
 
 [package.metadata.requires-dev]
 dev = [
