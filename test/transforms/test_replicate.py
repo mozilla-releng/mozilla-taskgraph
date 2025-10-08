@@ -1,9 +1,8 @@
 from itertools import count
 from pprint import pprint
-from unittest.mock import Mock
 
 import pytest
-from requests import HTTPError
+from taskcluster.exceptions import TaskclusterRestFailure
 from taskgraph.util.templates import merge
 
 from mozilla_taskgraph.transforms.replicate import transforms as replicate_transforms
@@ -139,11 +138,12 @@ def test_requests_error(responses, run_replicate):
         },
     }
     responses.get(
-        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public/task-graph.json",
-        body=HTTPError("Artifact not found!", response=Mock(status_code=403)),
+        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json",
+        json={"message": "Forbidden"},
+        status=403,
     )
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(TaskclusterRestFailure):
         run_replicate(task)
 
 
@@ -162,8 +162,9 @@ def test_task_id(responses, run_replicate):
     expected = get_expected(prefix, task_def)[0]
 
     responses.get(
-        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public/task-graph.json",
-        body=HTTPError("Artifact not found!", response=Mock(status_code=404)),
+        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json",
+        json={"message": "Artifact not found"},
+        status=404,
     )
     responses.get(f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}", json=task_def)
 
@@ -187,8 +188,9 @@ def test_index_path(responses, run_replicate):
         f"{TC_ROOT_URL}/api/index/v1/task/{index_path}", json={"taskId": task_id}
     )
     responses.get(
-        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public/task-graph.json",
-        body=HTTPError("Artifact not found!", response=Mock(status_code=404)),
+        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json",
+        json={"message": "Artifact not found"},
+        status=404,
     )
     responses.get(f"{TC_ROOT_URL}/api/queue/v1/task/{index_path}", json=task_def)
 
@@ -213,7 +215,7 @@ def test_decision_task(responses, run_replicate):
 
     counter = count()
     responses.get(
-        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public/task-graph.json",
+        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json",
         json={next(counter): task_def for task_def in task_defs},
     )
     result = run_replicate(task)
@@ -268,7 +270,7 @@ def test_filtered_out(responses, run_replicate, target_def):
 
     counter = count()
     responses.get(
-        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public/task-graph.json",
+        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json",
         json={next(counter): task_def for task_def in task_defs},
     )
     result = run_replicate(task)
