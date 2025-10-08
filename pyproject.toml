@@ -1,6 +1,6 @@
 [project]
 name = "mozilla-taskgraph"
-version = "3.4.1"
+version = "3.4.2"
 description = "Mozilla specific transforms and utilities for Taskgraph"
 readme = "README.md"
 authors = [
@@ -19,7 +19,7 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-  "taskcluster-taskgraph>=11,<16",
+  "taskcluster-taskgraph>=11,<17",
 ]
 
 [project.urls]

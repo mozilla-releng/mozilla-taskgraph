@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.8"
 resolution-markers = [
     "python_full_version >= '3.9'",
@@ -567,7 +567,7 @@ wheels = [
 
 [[package]]
 name = "mozilla-taskgraph"
-version = "3.4.1"
+version = "3.4.2"
 source = { editable = "." }
 dependencies = [
     { name = "taskcluster-taskgraph" },
@@ -590,7 +590,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "taskcluster-taskgraph", specifier = ">=11,<16" }]
+requires-dist = [{ name = "taskcluster-taskgraph", specifier = ">=11,<17" }]
 
 [package.metadata.requires-dev]
 dev = [
