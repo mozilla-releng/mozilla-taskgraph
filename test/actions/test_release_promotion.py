@@ -50,7 +50,7 @@ def setup(responses, parameters):
         responses.add(
             method="GET",
             url=get_artifact_url(
-                list(previous_graphs.keys())[0], "public/parameters.yml"
+                list(previous_graphs.keys())[0], "public%2Fparameters.yml"
             ),
             json=parameters,
         )
@@ -59,13 +59,13 @@ def setup(responses, parameters):
         for decision_id, full_task_graph in previous_graphs.items():
             responses.add(
                 method="GET",
-                url=get_artifact_url(decision_id, "public/full-task-graph.json"),
+                url=get_artifact_url(decision_id, "public%2Ffull-task-graph.json"),
                 json=full_task_graph.to_json(),
             )
             label_to_taskid = {label: int(next(tid)) for label in full_task_graph.tasks}
             responses.add(
                 method="GET",
-                url=get_artifact_url(decision_id, "public/label-to-taskid.json"),
+                url=get_artifact_url(decision_id, "public%2Flabel-to-taskid.json"),
                 json=label_to_taskid,
             )
 
