@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,13 @@ def set_taskcluster_url(session_mocker):
     session_mocker.patch.dict(
         "os.environ", {"TASKCLUSTER_ROOT_URL": liburl.test_root_url()}
     )
+
+    # The Taskcluster Proxy URL is cleared to ensure the test environment
+    # uses the root url instead of the proxy url as with the current
+    # implementation of get_artifact we default to using
+    # the proxy url if it is present in the environment
+    if "TASKCLUSTER_PROXY_URL" in os.environ:
+        del os.environ["TASKCLUSTER_PROXY_URL"]
 
 
 @pytest.fixture

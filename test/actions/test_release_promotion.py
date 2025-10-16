@@ -3,11 +3,13 @@ from itertools import count
 
 import pytest
 import taskcluster_urls as liburl
-from taskgraph.util.taskcluster import get_artifact_url
 
 from mozilla_taskgraph.actions import enable_action
 
-from ..conftest import make_graph, make_task
+from ..conftest import (
+    make_graph,
+    make_task,
+)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -49,9 +51,7 @@ def setup(responses, parameters):
         # Only the parameters from the first previous graph is downloaded.
         responses.add(
             method="GET",
-            url=get_artifact_url(
-                list(previous_graphs.keys())[0], "public/parameters.yml"
-            ),
+            url=f"{tc_url}/api/queue/v1/task/{list(previous_graphs.keys())[0]}/artifacts/public%2Fparameters.yml",
             json=parameters,
         )
 
@@ -59,13 +59,13 @@ def setup(responses, parameters):
         for decision_id, full_task_graph in previous_graphs.items():
             responses.add(
                 method="GET",
-                url=get_artifact_url(decision_id, "public/full-task-graph.json"),
+                url=f"{tc_url}/api/queue/v1/task/{decision_id}/artifacts/public%2Ffull-task-graph.json",
                 json=full_task_graph.to_json(),
             )
             label_to_taskid = {label: int(next(tid)) for label in full_task_graph.tasks}
             responses.add(
                 method="GET",
-                url=get_artifact_url(decision_id, "public/label-to-taskid.json"),
+                url=f"{tc_url}/api/queue/v1/task/{decision_id}/artifacts/public%2Flabel-to-taskid.json",
                 json=label_to_taskid,
             )
 

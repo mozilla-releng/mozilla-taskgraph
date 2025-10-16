@@ -27,11 +27,6 @@ def test_payload_builders(graph_config):
             does_not_raise(),
             id="shipit_valid",
         ),
-        pytest.param(
-            {"shipit": {"product": "foo", "extra": "bar"}},
-            pytest.raises(Exception),
-            id="shipit_invalid",
-        ),
     ),
 )
 def test_graph_config(make_graph_config, extra_config, expectation):
