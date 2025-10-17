@@ -1,3 +1,13 @@
+## 4.0.0 (2025-10-17)
+
+### Fix
+
+- declare support for Taskgraph 17.x
+- added support for taskcluster-taskgraph v16.2.1 (#117)
+
+
+- drop support for Python 3.8
+
 ## 3.4.2 (2025-10-08)
 
 ## Added
