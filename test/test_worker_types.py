@@ -1,6 +1,6 @@
 import inspect
 from pprint import pprint
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 import pytest
 from taskgraph.transforms.task import payload_builders
@@ -18,9 +18,9 @@ def build_payload(make_graph_config, make_transform_config, parameters):
     def inner(
         name: str,
         worker: dict,
-        extra_params: Optional[Dict] = None,
+        extra_params: Optional[dict] = None,
         raises: Optional[Exception] = None,
-    ) -> Optional[Tuple[Dict, Dict]]:
+    ) -> Optional[tuple[dict, dict]]:
         extra_params = extra_params or {}
 
         worker.setdefault("implementation", name)
