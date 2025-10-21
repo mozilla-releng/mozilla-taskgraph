@@ -19,7 +19,7 @@ workers:
       provisioner: '{trust-domain}-t'
       implementation: docker-worker
       os: linux
-      worker-type: '{alias}-gcp'
+      worker-type: '{alias}-docker'
     succeed:
       provisioner: built-in
       implementation: succeed
