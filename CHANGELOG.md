@@ -1,3 +1,9 @@
+## 4.0.1 (2025-11-17)
+
+### Fix
+
+- mark compatible with Taskgraph v18.x
+
 ## 4.0.0 (2025-10-17)
 
 ### Fix
