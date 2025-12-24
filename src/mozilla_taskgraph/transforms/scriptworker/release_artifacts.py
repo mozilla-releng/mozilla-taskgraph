@@ -11,13 +11,13 @@ import os
 
 from taskgraph.transforms.base import TransformSequence
 from taskgraph.transforms.task import task_description_schema
-from taskgraph.util.schema import Schema
+from taskgraph.util.schema import LegacySchema
 from taskgraph.util.workertypes import worker_type_implementation
 from voluptuous import Extra, Optional, Required
 
 transforms = TransformSequence()
 
-release_artifacts_schema = Schema(
+release_artifacts_schema = LegacySchema(
     {
         Required("worker-type"): task_description_schema["worker-type"],
         Optional("release-artifacts"): [str],
