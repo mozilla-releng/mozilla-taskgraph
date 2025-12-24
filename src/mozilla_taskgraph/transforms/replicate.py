@@ -11,7 +11,7 @@ from textwrap import dedent
 from taskcluster.exceptions import TaskclusterRestFailure
 from taskgraph.transforms.base import TransformSequence
 from taskgraph.util.attributes import attrmatch
-from taskgraph.util.schema import Schema
+from taskgraph.util.schema import LegacySchema
 from taskgraph.util.taskcluster import (
     find_task_id,
     get_artifact,
@@ -19,7 +19,7 @@ from taskgraph.util.taskcluster import (
 )
 from voluptuous import ALLOW_EXTRA, Any, Optional, Required
 
-REPLICATE_SCHEMA = Schema(
+REPLICATE_SCHEMA = LegacySchema(
     {
         Required(
             "replicate",

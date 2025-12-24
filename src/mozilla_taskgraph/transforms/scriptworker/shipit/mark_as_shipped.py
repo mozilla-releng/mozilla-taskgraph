@@ -6,12 +6,12 @@ import os
 from textwrap import dedent
 
 from taskgraph.transforms.base import TransformSequence
-from taskgraph.util.schema import Schema, optionally_keyed_by, resolve_keyed_by
+from taskgraph.util.schema import LegacySchema, optionally_keyed_by, resolve_keyed_by
 from voluptuous import Extra, Optional
 
 transforms = TransformSequence()
 
-mark_as_shipped_schema = Schema(
+mark_as_shipped_schema = LegacySchema(
     {
         Optional("name"): str,
         Optional("shipit-product"): optionally_keyed_by("build-type", str),
