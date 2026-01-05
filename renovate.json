@@ -2,5 +2,16 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "customManagers": [
+    {
+      "customType": "jsonata",
+      "managerFilePatterns": ".taskcluster.yml",
+      "fileFormat": "yaml",
+      "datasourceTemplate": "docker",
+      "matchStrings": [
+        "**.payload.image.{\"dependencyName\": $substringBefore(\":\"), \"currentValue\": $substringBefore($substringAfter(\":\"), \"@\"), \"currentDigest\": $substringAfter(\"sha256:\")}"
+      ]
+    }
   ]
 }
