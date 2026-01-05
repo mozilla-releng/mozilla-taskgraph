@@ -29,7 +29,7 @@ ENV SHELL=/bin/bash \
     PATH=/builds/worker/.local/bin:$PATH
 
 # uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.18 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.21 /uv /bin/uv
 # %ARG PYTHON_VERSIONS
 RUN uv python install $PYTHON_VERSIONS
 RUN chown -R worker:worker /builds/worker
