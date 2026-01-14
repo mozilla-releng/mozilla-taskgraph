@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-FROM debian:13-slim
+FROM debian:13-slim@sha256:77ba0164de17b88dd0bf6cdc8f65569e6e5fa6cd256562998b62553134a00ef0
 LABEL maintainer="Mozilla Release Engineering <release+mozilla-taskgraph@mozilla.com>"
 
 VOLUME /builds/worker/checkouts
