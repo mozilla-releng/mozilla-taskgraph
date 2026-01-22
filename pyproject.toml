@@ -27,20 +27,26 @@ dependencies = [
 Repository = "https://github.com/mozilla-releng/mozilla-taskgraph"
 Issues = "https://github.com/mozilla-releng/mozilla-taskgraph/issues"
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
   "commitizen",
   "coverage",
   "pytest",
   "pytest-mock",
   "responses",
+  "taskcluster_urls",
+]
+
+docs = [
   "sphinx~=5.3.0",
   "sphinx-autobuild",
   "sphinx-argparse",
   "sphinx-book-theme",
   "sphinxcontrib-mermaid",
-  "taskcluster_urls",
 ]
+
+[tool.uv.dependency-groups]
+docs = {requires-python = ">=3.12"}
 
 [build-system]
 requires = ["hatchling"]
