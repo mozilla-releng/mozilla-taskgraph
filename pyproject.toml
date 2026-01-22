@@ -42,7 +42,6 @@ docs = [
   "sphinx-autobuild",
   "sphinx-argparse",
   "sphinx-book-theme",
-  "sphinxcontrib-mermaid",
 ]
 
 [tool.uv.dependency-groups]
