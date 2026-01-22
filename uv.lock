@@ -836,12 +836,14 @@ dev = [
     { name = "pytest" },
     { name = "pytest-mock" },
     { name = "responses" },
+    { name = "taskcluster-urls" },
+]
+docs = [
     { name = "sphinx" },
     { name = "sphinx-argparse" },
     { name = "sphinx-autobuild" },
     { name = "sphinx-book-theme" },
     { name = "sphinxcontrib-mermaid" },
-    { name = "taskcluster-urls" },
 ]
 
 [package.metadata]
@@ -854,12 +856,14 @@ dev = [
     { name = "pytest" },
     { name = "pytest-mock" },
     { name = "responses" },
+    { name = "taskcluster-urls" },
+]
+docs = [
     { name = "sphinx", specifier = "~=5.3.0" },
     { name = "sphinx-argparse" },
     { name = "sphinx-autobuild" },
     { name = "sphinx-book-theme" },
     { name = "sphinxcontrib-mermaid" },
-    { name = "taskcluster-urls" },
 ]
 
 [[package]]
