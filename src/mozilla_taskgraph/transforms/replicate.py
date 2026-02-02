@@ -31,8 +31,7 @@ REPLICATE_SCHEMA = Schema(
         ): {
             Required(
                 "target",
-                description=dedent(
-                    """
+                description=dedent("""
                 Define which tasks to target for replication.
 
                 Each item in the list can be either:
@@ -42,8 +41,7 @@ REPLICATE_SCHEMA = Schema(
 
                 If any of the resolved tasks are a Decision task, targeted
                 tasks will be derived from the `task-graph.json` artifact.
-                """.lstrip()
-                ),
+                """.lstrip()),
             ): [str],
             Optional(
                 "include-attrs",

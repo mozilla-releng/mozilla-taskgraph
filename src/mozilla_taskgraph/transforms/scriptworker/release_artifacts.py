@@ -6,6 +6,7 @@ Support a 'release-artifacts' key which automatically sets up the artifacts
 under 'public/build' and adds the corresponding attribute needed by downstream
 release tasks.
 """
+
 import os
 
 from taskgraph.transforms.base import TransformSequence
