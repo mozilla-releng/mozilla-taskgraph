@@ -60,15 +60,11 @@ def make_task_description(config, tasks):
 
         if not product:
             config_path = os.path.join(config.graph_config.root_dir, "config.yml")
-            raise Exception(
-                dedent(
-                    f"""
+            raise Exception(dedent(f"""
                 Can't determine ShipIt product!
 
                 Define it as `shipit-product` in the task definition, or as `shipit.product`
-                in {config_path}.""".lstrip()
-                )
-            )
+                in {config_path}.""".lstrip()))
 
         task.setdefault("label", task.pop("name", "mark-as-shipped"))
         task["description"] = f"Mark {product} as shipped in Ship-It"
