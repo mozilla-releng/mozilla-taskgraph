@@ -1,3 +1,11 @@
+## 4.0.2 (2026-02-06)
+
+### Fix
+
+- Change all voluptuous schema names to LegacySchema
+- updated artifact fetch for taskgraph 19 compatibility
+- update readthedocs config
+
 ## 4.0.1 (2025-11-17)
 
 ### Fix
