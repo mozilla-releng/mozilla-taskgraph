@@ -214,10 +214,11 @@ def test_decision_task(responses, run_replicate):
     expected = get_expected(prefix, *task_defs)
 
     counter = count()
-    responses.get(
-        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json",
-        json={next(counter): task_def for task_def in task_defs},
+    url = (
+        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json"
     )
+    responses.get(url, json={"url": url})
+    responses.get(url, json={next(counter): task_def for task_def in task_defs})
     result = run_replicate(task)
     assert result == expected
 
@@ -269,9 +270,10 @@ def test_filtered_out(responses, run_replicate, target_def):
     task_defs = get_target_defs(target_def)
 
     counter = count()
-    responses.get(
-        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json",
-        json={next(counter): task_def for task_def in task_defs},
+    url = (
+        f"{TC_ROOT_URL}/api/queue/v1/task/{task_id}/artifacts/public%2Ftask-graph.json"
     )
+    responses.get(url, json={"url": url})
+    responses.get(url, json={next(counter): task_def for task_def in task_defs})
     result = run_replicate(task)
     assert len(result) == 0
