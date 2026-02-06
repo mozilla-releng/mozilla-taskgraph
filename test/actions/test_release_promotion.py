@@ -49,25 +49,22 @@ def setup(responses, parameters):
             )
 
         # Only the parameters from the first previous graph is downloaded.
-        responses.add(
-            method="GET",
-            url=f"{tc_url}/api/queue/v1/task/{list(previous_graphs.keys())[0]}/artifacts/public%2Fparameters.yml",
-            json=parameters,
-        )
+        # get_artifact does a two-step fetch: getLatestArtifact returns
+        # {"url": url}, then the content is fetched from that url.
+        url = f"{tc_url}/api/queue/v1/task/{list(previous_graphs.keys())[0]}/artifacts/public%2Fparameters.yml"
+        responses.add(method="GET", url=url, json={"url": url})
+        responses.add(method="GET", url=url, json=parameters)
 
         tid = count(0)
         for decision_id, full_task_graph in previous_graphs.items():
-            responses.add(
-                method="GET",
-                url=f"{tc_url}/api/queue/v1/task/{decision_id}/artifacts/public%2Ffull-task-graph.json",
-                json=full_task_graph.to_json(),
-            )
+            url = f"{tc_url}/api/queue/v1/task/{decision_id}/artifacts/public%2Ffull-task-graph.json"
+            responses.add(method="GET", url=url, json={"url": url})
+            responses.add(method="GET", url=url, json=full_task_graph.to_json())
+
             label_to_taskid = {label: int(next(tid)) for label in full_task_graph.tasks}
-            responses.add(
-                method="GET",
-                url=f"{tc_url}/api/queue/v1/task/{decision_id}/artifacts/public%2Flabel-to-taskid.json",
-                json=label_to_taskid,
-            )
+            url = f"{tc_url}/api/queue/v1/task/{decision_id}/artifacts/public%2Flabel-to-taskid.json"
+            responses.add(method="GET", url=url, json={"url": url})
+            responses.add(method="GET", url=url, json=label_to_taskid)
 
     return inner
 
