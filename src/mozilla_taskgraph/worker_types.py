@@ -1,39 +1,35 @@
 import binascii
 from base64 import b64decode
+from typing import Literal, Optional, Union
 
-from taskgraph.transforms.task import payload_builder, taskref_or_string
-from voluptuous import Any, Extra, Optional, Required
+from taskgraph.transforms.task import payload_builder
+from taskgraph.util.schema import Schema, taskref_or_string_msgspec
 
 from mozilla_taskgraph.util.signed_artifacts import get_signed_artifacts
+
+# -- scriptworker-bitrise schemas --
+
+
+class BitriseConfig(
+    Schema, rename=lambda name: name, forbid_unknown_fields=False, kw_only=True
+):
+    # Name of Bitrise App to schedule workflows on.
+    app: str
+    # List of workflows to trigger on specified app.
+    # Can also be an object that maps workflow_ids to environment variables.
+    workflows: list[Union[str, dict[str, list[dict[str, taskref_or_string_msgspec]]]]]
+    # Directory prefix to store artifacts. Set this to 'public'
+    # to create public artifacts.
+    artifact_prefix: Optional[str] = None
+
+
+class ScriptworkerBitriseSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    bitrise: BitriseConfig
 
 
 @payload_builder(
     "scriptworker-bitrise",
-    schema={
-        Required("bitrise"): {
-            Required(
-                "app", description="Name of Bitrise App to schedule workflows on."
-            ): str,
-            Required(
-                "workflows",
-                description="List of workflows to trigger on specified app. "
-                "Can also be an object that maps workflow_ids to environment variables.",
-            ): [
-                Any(
-                    # Workflow id - no special environment variable
-                    str,
-                    # Map of workflow id to permutations of environment variables
-                    {str: [{str: taskref_or_string}]},
-                )
-            ],
-            Optional(
-                "artifact_prefix",
-                description="Directory prefix to store artifacts. Set this to 'public' "
-                "to create public artifacts.",
-            ): str,
-        },
-        Extra: object,
-    },
+    schema=ScriptworkerBitriseSchema,
 )
 def build_bitrise_payload(config, task, task_def):
     bitrise = task["worker"]["bitrise"]
@@ -120,11 +116,16 @@ def build_bitrise_payload(config, task, task_def):
         task_def["payload"]["artifact_prefix"] = bitrise["artifact_prefix"]
 
 
+# -- scriptworker-shipit schemas --
+
+
+class ScriptworkerShipitSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    release_name: str
+
+
 @payload_builder(
     "scriptworker-shipit",
-    schema={
-        Required("release-name"): str,
-    },
+    schema=ScriptworkerShipitSchema,
 )
 def build_shipit_payload(config, task, task_def):
     worker = task["worker"]
@@ -132,27 +133,34 @@ def build_shipit_payload(config, task, task_def):
     task_def["payload"] = {"release_name": worker["release-name"]}
 
 
+# -- scriptworker-signing schemas --
+
+
+class SigningUpstreamArtifact(
+    Schema, rename=lambda name: name, forbid_unknown_fields=False, kw_only=True
+):
+    # taskId of the task with the artifact
+    taskId: taskref_or_string_msgspec
+    # type of signing task (for CoT)
+    taskType: str
+    # Paths to the artifacts to sign
+    paths: list[str]
+    # Signing formats to use on each of the paths
+    formats: list[str]
+    # Only For MSI, optional for the signed Installer
+    authenticode_comment: Optional[str] = None
+
+
+class ScriptworkerSigningSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    signing_type: str
+    # list of artifact URLs for the artifacts that should be signed
+    upstream_artifacts: list[SigningUpstreamArtifact]
+    max_run_time: Optional[int] = None
+
+
 @payload_builder(
     "scriptworker-signing",
-    schema={
-        Required("signing-type"): str,
-        # list of artifact URLs for the artifacts that should be signed
-        Required("upstream-artifacts"): [
-            {
-                # taskId of the task with the artifact
-                Required("taskId"): taskref_or_string,
-                # type of signing task (for CoT)
-                Required("taskType"): str,
-                # Paths to the artifacts to sign
-                Required("paths"): [str],
-                # Signing formats to use on each of the paths
-                Required("formats"): [str],
-                # Only For MSI, optional for the signed Installer
-                Optional("authenticode_comment"): str,
-            }
-        ],
-        Optional("max-run-time"): int,
-    },
+    schema=ScriptworkerSigningSchema,
 )
 def build_signing_payload(config, task, task_def):
     worker = task["worker"]
@@ -188,147 +196,128 @@ def build_signing_payload(config, task, task_def):
     task["attributes"]["release_artifacts"] = sorted(list(artifacts))
 
 
-l10n_bump_info_schema = [
-    {
-        Required("name"): str,
-        Required("path"): str,
-        Required("l10n-repo-url"): str,
-        Required("l10n-repo-target-branch"): str,
-        Optional("ignore-config"): object,
-        Required("platform-configs"): [
-            {
-                Required("platforms"): [str],
-                Required("path"): str,
-                Optional("format"): str,
-            }
-        ],
-    }
-]
+# -- scriptworker-lando schemas --
 
 
-def process_l10n_bump_info(info):
-    l10n_bump_info = []
-    l10n_repo_urls = set()
-    for lbi in info:
-        l10n_repo_urls.add(lbi["l10n-repo-url"])
-        l10n_bump_info.append(dash_to_underscore(lbi))
+class TomlInfoSync(Schema):
+    toml_path: str
 
-    if len(l10n_repo_urls) > 1:
-        raise Exception(
-            "Must use the same l10n-repo-url for all files in the same task!"
-        )
 
-    return l10n_bump_info
+class AndroidL10nSyncConfig(Schema):
+    from_branch: str
+    toml_info: list[TomlInfoSync]
+
+
+class TomlInfoImport(Schema):
+    toml_path: str
+    dest_path: str
+
+
+class AndroidL10nImportConfig(Schema):
+    from_repo_url: str
+    toml_info: list[TomlInfoImport]
+
+
+class PlatformConfig(Schema):
+    platforms: list[str]
+    path: str
+    format: Optional[str] = None
+
+
+class L10nBumpInfo(Schema):
+    name: str
+    path: str
+    l10n_repo_url: str
+    l10n_repo_target_branch: str
+    platform_configs: list[PlatformConfig]
+    ignore_config: Optional[object] = None
+
+
+class TagConfig(Schema):
+    types: list[Literal["buildN", "release"]]
+    hg_repo_url: str
+
+
+class VersionBumpConfig(Schema):
+    bump_files: list[str]
+
+
+class VersionFileStrict(Schema):
+    filename: str
+    version_bump: str
+    new_suffix: Optional[str] = None
+
+
+class VersionFile(Schema):
+    filename: str
+    version_bump: Optional[str] = None
+    new_suffix: Optional[str] = None
+
+
+# the remaining action types all end up using the "merge_day"
+# landoscript action. however, these are quite varied tasks,
+# and separating them out allows us to have stronger schemas.
+
+
+class EsrBumpConfig(Schema):
+    to_branch: str
+    fetch_version_from: str
+    version_files: list[VersionFileStrict]
+
+
+class MainBumpConfig(Schema):
+    to_branch: str
+    fetch_version_from: str
+    version_files: list[VersionFileStrict]
+    replacements: Optional[list[list[str]]] = None
+    regex_replacements: Optional[list[list[str]]] = None
+    end_tag: Optional[str] = None
+
+
+class EarlyToLateBetaConfig(Schema):
+    to_branch: str
+    # technically not used, but passing it keeps landoscript
+    # code cleaner, so we may as well require a real value
+    # for it.
+    fetch_version_from: str
+    replacements: Optional[list[list[str]]] = None
+
+
+class UpliftConfig(Schema):
+    fetch_version_from: str
+    version_files: list[VersionFile]
+    from_branch: str
+    to_branch: str
+    replacements: Optional[list[list[str]]] = None
+    base_tag: Optional[str] = None
+    end_tag: Optional[str] = None
+    l10n_bump_info: Optional[list[L10nBumpInfo]] = None
+
+
+class LandoAction(Schema, forbid_unknown_fields=False, kw_only=True):
+    android_l10n_sync: Optional[AndroidL10nSyncConfig] = None
+    android_l10n_import: Optional[AndroidL10nImportConfig] = None
+    l10n_bump: Optional[list[L10nBumpInfo]] = None
+    tag: Optional[TagConfig] = None
+    version_bump: Optional[VersionBumpConfig] = None
+    esr_bump: Optional[EsrBumpConfig] = None
+    main_bump: Optional[MainBumpConfig] = None
+    early_to_late_beta: Optional[EarlyToLateBetaConfig] = None
+    uplift: Optional[UpliftConfig] = None
+
+
+class ScriptworkerLandoSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    lando_repo: str
+    actions: list[LandoAction]
+    ignore_closed_tree: Optional[bool] = None
+    dontbuild: Optional[bool] = None
+    force_dry_run: Optional[bool] = None
+    matrix_rooms: Optional[list[str]] = None
 
 
 @payload_builder(
     "scriptworker-lando",
-    schema={
-        Required("lando-repo"): str,
-        Required("actions"): [
-            Any(
-                {
-                    Required("android-l10n-sync"): {
-                        Required("from-branch"): str,
-                        Required("toml-info"): [
-                            {
-                                Required("toml-path"): str,
-                            }
-                        ],
-                    },
-                },
-                {
-                    Required("android-l10n-import"): {
-                        Required("from-repo-url"): str,
-                        Required("toml-info"): [
-                            {
-                                Required("toml-path"): str,
-                                Required("dest-path"): str,
-                            }
-                        ],
-                    },
-                },
-                {
-                    Required("l10n-bump"): l10n_bump_info_schema,
-                },
-                {
-                    Required("tag"): {
-                        Required("types"): [Any("buildN", "release")],
-                        Required("hg-repo-url"): str,
-                    }
-                },
-                {
-                    Required("version-bump"): {
-                        Required("bump-files"): [str],
-                    },
-                },
-                # the remaining action types all end up using the "merge_day"
-                # landoscript action. however, these are quite varied tasks,
-                # and separating them out allows us to have stronger schemas.
-                {
-                    Required("esr-bump"): {
-                        Required("to-branch"): str,
-                        Required("fetch-version-from"): str,
-                        Required("version-files"): [
-                            {
-                                Required("filename"): str,
-                                Required("version-bump"): str,
-                                Optional("new-suffix"): str,
-                            },
-                        ],
-                    },
-                },
-                {
-                    Required("main-bump"): {
-                        Required("to-branch"): str,
-                        Required("fetch-version-from"): str,
-                        Required("version-files"): [
-                            {
-                                Required("filename"): str,
-                                Required("version-bump"): str,
-                                Optional("new-suffix"): str,
-                            },
-                        ],
-                        Optional("replacements"): [[str]],
-                        Optional("regex-replacements"): [[str]],
-                        Optional("end-tag"): str,
-                    },
-                },
-                {
-                    Required("early-to-late-beta"): {
-                        Required("to-branch"): str,
-                        # technically not used, but passing it keeps landoscript
-                        # code cleaner, so we may as well require a real value
-                        # for it.
-                        Required("fetch-version-from"): str,
-                        Optional("replacements"): [[str]],
-                    },
-                },
-                {
-                    Required("uplift"): {
-                        Required("fetch-version-from"): str,
-                        Required("version-files"): [
-                            {
-                                Required("filename"): str,
-                                Optional("version-bump"): str,
-                                Optional("new-suffix"): str,
-                            },
-                        ],
-                        Required("from-branch"): str,
-                        Required("to-branch"): str,
-                        Optional("replacements"): [[str]],
-                        Optional("base-tag"): str,
-                        Optional("end-tag"): str,
-                        Optional("l10n-bump-info"): l10n_bump_info_schema,
-                    },
-                },
-            )
-        ],
-        Optional("ignore-closed-tree"): bool,
-        Optional("dontbuild"): bool,
-        Optional("force-dry-run"): bool,
-        Optional("matrix-rooms"): [str],
-    },
+    schema=ScriptworkerLandoSchema,
 )
 def build_lando_payload(config, task, task_def):
     worker = task["worker"]
@@ -465,6 +454,21 @@ def get_release_config(config):
     }
 
 
+def process_l10n_bump_info(info):
+    l10n_bump_info = []
+    l10n_repo_urls = set()
+    for lbi in info:
+        l10n_repo_urls.add(lbi["l10n-repo-url"])
+        l10n_bump_info.append(dash_to_underscore(lbi))
+
+    if len(l10n_repo_urls) > 1:
+        raise Exception(
+            "Must use the same l10n-repo-url for all files in the same task!"
+        )
+
+    return l10n_bump_info
+
+
 def dash_to_underscore(obj):
     new_obj = {}
     for k, v in obj.items():
@@ -472,21 +476,28 @@ def dash_to_underscore(obj):
     return new_obj
 
 
+# -- scriptworker-beetmover-data schemas --
+
+
+class DataMapEntry(Schema):
+    data: str
+    content_type: str
+    destinations: list[taskref_or_string_msgspec]
+
+
+class ScriptworkerBeetmoverDataSchema(
+    Schema, forbid_unknown_fields=False, kw_only=True
+):
+    app_name: str
+    bucket: str
+    project: str
+    data_map: list[DataMapEntry]
+    dry_run: Optional[bool] = None
+
+
 @payload_builder(
     "scriptworker-beetmover-data",
-    schema={
-        Required("app-name"): str,
-        Required("bucket"): str,
-        Required("project"): str,
-        Required("data-map"): [
-            {
-                Required("data"): str,
-                Required("content-type"): str,
-                Required("destinations"): [taskref_or_string],
-            },
-        ],
-        Optional("dry-run"): bool,
-    },
+    schema=ScriptworkerBeetmoverDataSchema,
 )
 def build_beetmover_data_payload(_, task, task_def):
     worker = task["worker"]
