@@ -206,7 +206,7 @@ tasks:
                           features:
                               taskclusterProxy: true
 
-                          image: mozillareleases/taskgraph:run-task-v18.1.0@sha256:43d1ba6d149bf8539b1bc7aef95c9adfe8ca76714f2f6beaa5f87c3059559466
+                          image: mozillareleases/taskgraph:run-task-v19.0.0@sha256:79dccafcfff951ab74c8ca9dea81ff339723da3cef64dbcc1d98c493638e85fe
                           maxRunTime: 1800
 
                           command:
