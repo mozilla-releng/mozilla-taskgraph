@@ -2,77 +2,55 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from __future__ import annotations
-
 import os
 import re
-from textwrap import dedent
+from typing import Optional, Union
 
 from taskcluster.exceptions import TaskclusterRestFailure
 from taskgraph.transforms.base import TransformSequence
 from taskgraph.util.attributes import attrmatch
-from taskgraph.util.schema import LegacySchema
+from taskgraph.util.schema import Schema
 from taskgraph.util.taskcluster import (
     find_task_id,
     get_artifact,
     get_task_definition,
 )
-from voluptuous import ALLOW_EXTRA, Any, Optional, Required
 
-REPLICATE_SCHEMA = LegacySchema(
-    {
-        Required(
-            "replicate",
-            description=dedent(
-                """
-            Configuration for the replicate transforms.
-            """.lstrip(),
-            ),
-        ): {
-            Required(
-                "target",
-                description=dedent("""
-                Define which tasks to target for replication.
 
-                Each item in the list can be either:
+class ReplicateConfig(Schema):
+    """Configuration for the replicate transforms."""
 
-                    1. A taskId
-                    2. An index path that points to a single task
+    # Define which tasks to target for replication.
+    #
+    # Each item in the list can be either:
+    #
+    #     1. A taskId
+    #     2. An index path that points to a single task
+    #
+    # If any of the resolved tasks are a Decision task, targeted
+    # tasks will be derived from the ``task-graph.json`` artifact.
+    target: list[str]
+    # A dict of attribute key/value pairs that targeted tasks will be
+    # filtered on. Targeted tasks must *match all* of the given
+    # attributes or they will be ignored.
+    #
+    # Matching is performed by the :func:`~taskgraph.util.attrmatch`
+    # utility function.
+    include_attrs: Optional[dict[str, Union[str, list[str]]]] = None
+    # A dict of attribute key/value pairs that targeted tasks will be
+    # filtered on. Targeted tasks must *not match any* of the given
+    # attributes or they will be ignored.
+    #
+    # Matching is performed by the :func:`~taskgraph.util.attrmatch`
+    # utility function.
+    exclude_attrs: Optional[dict[str, Union[str, list[str]]]] = None
 
-                If any of the resolved tasks are a Decision task, targeted
-                tasks will be derived from the `task-graph.json` artifact.
-                """.lstrip()),
-            ): [str],
-            Optional(
-                "include-attrs",
-                description=dedent(
-                    """
-                A dict of attribute key/value pairs that targeted tasks will be
-                filtered on. Targeted tasks must *match all* of the given
-                attributes or they will be ignored.
 
-                Matching is performed by the :func:`~taskgraph.util.attrmatch`
-                utility function.
-                """.lstrip(),
-                ),
-            ): {str: Any(str, [str])},
-            Optional(
-                "exclude-attrs",
-                description=dedent(
-                    """
-                A dict of attribute key/value pairs that targeted tasks will be
-                filtered on. Targeted tasks must *not match any* of the given
-                attributes or they will be ignored.
+class ReplicateSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    replicate: ReplicateConfig
 
-                Matching is performed by the :func:`~taskgraph.util.attrmatch`
-                utility function.
-                """.lstrip(),
-                ),
-            ): {str: Any(str, [str])},
-        },
-    },
-    extra=ALLOW_EXTRA,
-)
+
+REPLICATE_SCHEMA = ReplicateSchema
 
 TASK_ID_RE = re.compile(
     r"^[A-Za-z0-9_-]{8}[Q-T][A-Za-z0-9_-][CGKOSWaeimquy26-][A-Za-z0-9_-]{10}[AQgw]$"
