@@ -4,22 +4,22 @@
 
 import os
 from textwrap import dedent
+from typing import Optional
 
 from taskgraph.transforms.base import TransformSequence
-from taskgraph.util.schema import LegacySchema, optionally_keyed_by, resolve_keyed_by
-from voluptuous import Extra, Optional
+from taskgraph.util.schema import Schema, optionally_keyed_by, resolve_keyed_by
 
 transforms = TransformSequence()
 
-mark_as_shipped_schema = LegacySchema(
-    {
-        Optional("name"): str,
-        Optional("shipit-product"): optionally_keyed_by("build-type", str),
-        Extra: object,
-    }
-)
 
-transforms.add_validate(mark_as_shipped_schema)
+class MarkAsShippedSchema(Schema, forbid_unknown_fields=False, kw_only=True):
+    name: Optional[str] = None
+    shipit_product: Optional[
+        optionally_keyed_by("build-type", str, use_msgspec=True)
+    ] = None
+
+
+transforms.add_validate(MarkAsShippedSchema)
 
 
 @transforms.add
