@@ -1,3 +1,9 @@
+## 4.1.0 (2026-02-17)
+
+### Feat
+
+- convert all voluptuous schemas to msgspec
+
 ## 4.0.2 (2026-02-06)
 
 ### Fix
