@@ -792,7 +792,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -1214,7 +1214,7 @@ wheels = [
 
 [[package]]
 name = "mozilla-taskgraph"
-version = "4.0.2"
+version = "4.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "taskcluster-taskgraph" },
@@ -1240,7 +1240,7 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "taskcluster-taskgraph", git = "https://github.com/taskcluster/taskgraph?rev=main" }]
+requires-dist = [{ name = "taskcluster-taskgraph", specifier = ">=19.1,<20" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -2086,8 +2086,8 @@ wheels = [
 
 [[package]]
 name = "taskcluster-taskgraph"
-version = "19.0.0"
-source = { git = "https://github.com/taskcluster/taskgraph?rev=main#a1a77e1bf21463e11baecf5035839a2c86f79949" }
+version = "19.1.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
     { name = "cookiecutter" },
@@ -2102,6 +2102,10 @@ dependencies = [
     { name = "taskcluster" },
     { name = "taskcluster-urls" },
     { name = "voluptuous" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3e/f2/969fffd43c7c35c1160018bd5f90fb09e3e14be8b67ee78959fbfac531a2/taskcluster_taskgraph-19.1.0.tar.gz", hash = "sha256:a99d08021afb4e9d7006619a9bccbdbf70a84e93f8b62dce66f1b4e2032f1c6f", size = 555937, upload-time = "2026-02-17T21:44:11.249Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/85/f5/0ada15b6b972c3a23b9c47211e3a97d10615326e507f005e35f6f7dbd757/taskcluster_taskgraph-19.1.0-py3-none-any.whl", hash = "sha256:832f1151402bc05b72da1fdd9cd37b294819bee140e36073262ffc897b68dac3", size = 206626, upload-time = "2026-02-17T21:44:09.902Z" },
 ]
 
 [[package]]
