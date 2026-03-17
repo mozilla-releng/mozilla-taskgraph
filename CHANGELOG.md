@@ -1,3 +1,9 @@
+## 4.1.1 (2026-03-17)
+
+### Fix
+
+- mark compatible with Taskgraph v20.x
+
 ## 4.1.0 (2026-02-17)
 
 ### Feat
