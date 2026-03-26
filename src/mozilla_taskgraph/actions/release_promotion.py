@@ -89,14 +89,16 @@ from mozilla_taskgraph.actions import make_action_available
         ],
     },
 )
-def release_promotion_action(parameters, graph_config, input, task_group_id, task_id):
+def release_promotion_action(
+    push_parameters, graph_config, input, task_group_id, task_id
+):
     release_promotion_flavor = input["release_promotion_flavor"]
     promotion_config = graph_config["release-promotion"]["flavors"][
         release_promotion_flavor
     ]
 
     target_tasks_method = promotion_config["target-tasks-method"].format(
-        project=parameters["project"]
+        project=push_parameters["project"]
     )
     rebuild_kinds = input.get(
         "rebuild_kinds", promotion_config.get("rebuild-kinds", [])
@@ -106,7 +108,7 @@ def release_promotion_action(parameters, graph_config, input, task_group_id, tas
     )
 
     # make parameters read-write
-    parameters = dict(parameters)
+    parameters = dict(push_parameters)
     # Build previous_graph_ids from ``previous_graph_ids`` or ``revision``.
     previous_graph_ids = input.get("previous_graph_ids")
     if not previous_graph_ids:
@@ -114,6 +116,13 @@ def release_promotion_action(parameters, graph_config, input, task_group_id, tas
 
     # Download parameters from the first decision task
     parameters = get_artifact(previous_graph_ids[0], "public/parameters.yml")
+    # Override `head_rev` - this should always be the revision that this action
+    # task was fired from. If the first `previous_graph_id` given was from an
+    # earlier revision, it will end up being wrong. This will cause any created
+    # tasks to have the wrong revision set, which causes problems such as showing
+    # up in the wrong place on Treeherder, and associated cached task digests
+    # with unmatched sources.
+    parameters["head_rev"] = push_parameters["head_rev"]
 
     # Download and combine full task graphs from each of the previous_graph_ids.
     # Sometimes previous relpro action tasks will add tasks, like partials,
