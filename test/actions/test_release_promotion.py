@@ -27,7 +27,11 @@ def mock_version(session_mocker):
 def setup(responses, parameters):
     tc_url = liburl.test_root_url()
 
-    def inner(previous_graphs=None):
+    def inner(previous_graphs=None, parameter_overrides=None):
+        final_params = parameters.copy()
+        if parameter_overrides:
+            final_params.update(parameter_overrides)
+
         if not previous_graphs:
             decision_id = "d0"
             previous_graphs = {
@@ -53,7 +57,7 @@ def setup(responses, parameters):
         # {"url": url}, then the content is fetched from that url.
         url = f"{tc_url}/api/queue/v1/task/{list(previous_graphs.keys())[0]}/artifacts/public%2Fparameters.yml"
         responses.add(method="GET", url=url, json={"url": url})
-        responses.add(method="GET", url=url, json=parameters)
+        responses.add(method="GET", url=url, json=final_params)
 
         tid = count(0)
         for decision_id, full_task_graph in previous_graphs.items():
@@ -151,12 +155,16 @@ def test_release_promotion_combine_previous_graphs(
             ),
         ),
     }
-    setup(previous_graphs)
+    # ensure a different `head_rev` is returned than the one in `parameters`
+    # when the previous decision task parameters are fetched, so we can ensure
+    # it is not the one used when the final parameters are constructed
+    setup(previous_graphs, {"head_rev": "ghijkl"})
     expected_params = parameters.copy()
     expected_params.update(
         {
             "do_not_optimize": [],
             "existing_tasks": {"a": 0, "b": 2, "c": 3},
+            "head_rev": "abcdef",
             "optimize_target_tasks": True,
             "shipping_phase": "ship",
             "target_tasks_method": "target_ship",
