@@ -20,7 +20,7 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-  "taskcluster-taskgraph>=19.1,<21",
+  "taskcluster-taskgraph>=19.1,<22",
 ]
 
 [project.urls]
