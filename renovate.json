@@ -8,6 +8,10 @@
       "matchManagers": ["pep621"],
       "matchDepTypes": ["project.dependencies"],
       "rangeStrategy": "widen"
+    },
+    {
+      "matchPackageNames": ["taskcluster-taskgraph", "mozillareleases/taskgraph"],
+      "groupName": "taskgraph"
     }
   ]
 }
