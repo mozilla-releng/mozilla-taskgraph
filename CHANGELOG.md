@@ -1,3 +1,10 @@
+## 4.1.2 (2026-05-01)
+
+### Fix
+
+- mark compatible with Taskgraph v23.x
+- ensure head_rev always matches the one the action task is running from
+
 ## 4.1.1 (2026-03-17)
 
 ### Fix
