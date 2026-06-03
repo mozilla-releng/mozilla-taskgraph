@@ -1,3 +1,9 @@
+## 4.1.3 (2026-06-03)
+
+### Fix
+
+- mark mozilla-taskgraph compatible with Taskgraph v24
+
 ## 4.1.2 (2026-05-01)
 
 ### Fix
