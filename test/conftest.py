@@ -71,9 +71,6 @@ def graph_config(make_graph_config):
 class FakeParameters(dict):
     strict = True
 
-    def is_try(self):
-        return False
-
     def file_url(self, path, pretty=False):
         return path
 
