@@ -780,12 +780,305 @@ def test_lando_merge_bump_esr(build_payload, dry_run):
                         },
                     ],
                     "to-branch": "to-b",
+                    "to-revision": "abcdef",
                 }
             }
         ],
     }
     _, task_def = build_payload("scriptworker-lando", worker=worker)
     expected = {
+        "payload": {
+            "actions": ["merge_day"],
+            "lando_repo": "testrepo",
+            "merge_info": {
+                "fetch_version_from": "version.txt",
+                "version_files": [
+                    {
+                        "filename": "version.txt",
+                        "version_bump": "minor",
+                    },
+                    {
+                        "filename": "other.txt",
+                        "new_suffix": "esr",
+                        "version_bump": "minor",
+                    },
+                ],
+                "to_branch": "to-b",
+                "to_revision": "abcdef",
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:merge_day",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+    if dry_run:
+        expected["payload"]["dry_run"] = dry_run
+
+    assert task_def == expected
+
+
+def test_lando_merge_bump_main(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "actions": [
+            {
+                "main-bump": {
+                    "fetch-version-from": "version.txt",
+                    "version-files": [
+                        {
+                            "filename": "version.txt",
+                            "new-suffix": "a1",
+                            "version-bump": "minor",
+                        },
+                        {
+                            "filename": "other.txt",
+                            "new-suffix": "a1",
+                            "version-bump": "minor",
+                        },
+                    ],
+                    "to-branch": "to-b",
+                    "to-revision": "abcdef",
+                    "replacements": [
+                        [
+                            "filename",
+                            "before.{current_weave_version}",
+                            "after.{current_weave_version}",
+                        ]
+                    ],
+                    "regex-replacements": [
+                        ["filename", "foo [0-9]+.0", "foo {next_major_version}.0"]
+                    ],
+                    "end-tag": "PRODUCT_{major_version}_END",
+                }
+            }
+        ],
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["merge_day"],
+            "lando_repo": "testrepo",
+            "merge_info": {
+                "fetch_version_from": "version.txt",
+                "version_files": [
+                    {
+                        "filename": "version.txt",
+                        "new_suffix": "a1",
+                        "version_bump": "minor",
+                    },
+                    {
+                        "filename": "other.txt",
+                        "new_suffix": "a1",
+                        "version_bump": "minor",
+                    },
+                ],
+                "replacements": [
+                    [
+                        "filename",
+                        "before.{current_weave_version}",
+                        "after.{current_weave_version}",
+                    ]
+                ],
+                "regex_replacements": [
+                    ["filename", "foo [0-9]+.0", "foo {next_major_version}.0"]
+                ],
+                "end_tag": "PRODUCT_{major_version}_END",
+                "to_branch": "to-b",
+                "to_revision": "abcdef",
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:merge_day",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_merge_early_to_late_beta(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "actions": [
+            {
+                "early-to-late-beta": {
+                    "replacements": [
+                        [
+                            "defines",
+                            "foo=1",
+                            "foo=",
+                        ]
+                    ],
+                    "to-branch": "to-b",
+                    "to-revision": "abcdef",
+                    "fetch-version-from": "foo/bar.txt",
+                }
+            }
+        ],
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["merge_day"],
+            "lando_repo": "testrepo",
+            "merge_info": {
+                "replacements": [
+                    [
+                        "defines",
+                        "foo=1",
+                        "foo=",
+                    ]
+                ],
+                "to_branch": "to-b",
+                "to_revision": "abcdef",
+                "fetch_version_from": "foo/bar.txt",
+            },
+        },
+        "scopes": [
+            "project:releng:lando:action:merge_day",
+            "project:releng:lando:repo:testrepo",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_merge_main_to_beta(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "matrix-rooms": ["!foobar:mozilla.org"],
+        "actions": [
+            {
+                "uplift": {
+                    "fetch-version-from": "version.txt",
+                    "version-files": [
+                        {
+                            "filename": "version.txt",
+                        },
+                        {
+                            "filename": "other.txt",
+                            "new-suffix": "b1",
+                        },
+                    ],
+                    "replacements": [
+                        [
+                            "mozconfig",
+                            "nightly",
+                            "official",
+                        ]
+                    ],
+                    "base-tag": "PRODUCT_{major_version}_BASE",
+                    "end-tag": "PRODUCT_{major_version}_END",
+                    "to-branch": "to-b",
+                    "to-revision": "abcdef",
+                    "from-branch": "from-b",
+                    "from-revision": "ghijkl",
+                    "l10n-bump-info": [
+                        {
+                            "name": "l10n",
+                            "path": "foo/bar/changesets.json",
+                            "l10n-repo-url": "https://l10n",
+                            "l10n-repo-target-branch": "branchy",
+                            "ignore-config": {"ab": ["foo"]},
+                            "platform-configs": [
+                                {
+                                    "platforms": ["p1", "p2"],
+                                    "path": "foo/bar/locales",
+                                },
+                            ],
+                        }
+                    ],
+                }
+            }
+        ],
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
+        "payload": {
+            "actions": ["merge_day"],
+            "lando_repo": "testrepo",
+            "merge_info": {
+                "fetch_version_from": "version.txt",
+                "version_files": [
+                    {
+                        "filename": "version.txt",
+                    },
+                    {
+                        "filename": "other.txt",
+                        "new_suffix": "b1",
+                    },
+                ],
+                "replacements": [
+                    [
+                        "mozconfig",
+                        "nightly",
+                        "official",
+                    ]
+                ],
+                "merge_old_head": True,
+                "base_tag": "PRODUCT_{major_version}_BASE",
+                "end_tag": "PRODUCT_{major_version}_END",
+                "to_branch": "to-b",
+                "to_revision": "abcdef",
+                "from_branch": "from-b",
+                "from_revision": "ghijkl",
+                "l10n_bump_info": [
+                    {
+                        "name": "l10n",
+                        "path": "foo/bar/changesets.json",
+                        "l10n_repo_url": "https://l10n",
+                        "l10n_repo_target_branch": "branchy",
+                        "ignore_config": {
+                            "ab": ["foo"],
+                        },
+                        "platform_configs": [
+                            {
+                                "platforms": ["p1", "p2"],
+                                "path": "foo/bar/locales",
+                            },
+                        ],
+                    }
+                ],
+            },
+        },
+        "routes": [
+            "notify.matrix-room.!foobar:mozilla.org.on-pending",
+            "notify.matrix-room.!foobar:mozilla.org.on-resolved",
+        ],
+        "scopes": [
+            "project:releng:lando:action:merge_day",
+            "project:releng:lando:repo:testrepo",
+            "queue:route:notify.matrix-room.*",
+        ],
+        "tags": {"worker-implementation": "scriptworker"},
+    }
+
+
+def test_lando_merge_bump_esr_no_revision(build_payload):
+    worker = {
+        "lando-repo": "testrepo",
+        "actions": [
+            {
+                "esr-bump": {
+                    "fetch-version-from": "version.txt",
+                    "version-files": [
+                        {
+                            "filename": "version.txt",
+                            "version-bump": "minor",
+                        },
+                        {
+                            "filename": "other.txt",
+                            "new-suffix": "esr",
+                            "version-bump": "minor",
+                        },
+                    ],
+                    "to-branch": "to-b",
+                }
+            }
+        ],
+    }
+    _, task_def = build_payload("scriptworker-lando", worker=worker)
+    assert task_def == {
         "payload": {
             "actions": ["merge_day"],
             "lando_repo": "testrepo",
@@ -811,13 +1104,9 @@ def test_lando_merge_bump_esr(build_payload, dry_run):
         ],
         "tags": {"worker-implementation": "scriptworker"},
     }
-    if dry_run:
-        expected["payload"]["dry_run"] = dry_run
-
-    assert task_def == expected
 
 
-def test_lando_merge_bump_main(build_payload):
+def test_lando_merge_bump_main_no_revision(build_payload):
     worker = {
         "lando-repo": "testrepo",
         "actions": [
@@ -893,7 +1182,7 @@ def test_lando_merge_bump_main(build_payload):
     }
 
 
-def test_lando_merge_early_to_late_beta(build_payload):
+def test_lando_merge_early_to_late_beta_no_revision(build_payload):
     worker = {
         "lando-repo": "testrepo",
         "actions": [
@@ -937,7 +1226,7 @@ def test_lando_merge_early_to_late_beta(build_payload):
     }
 
 
-def test_lando_merge_main_to_beta(build_payload):
+def test_lando_merge_beta_to_release_no_revision(build_payload):
     worker = {
         "lando-repo": "testrepo",
         "matrix-rooms": ["!foobar:mozilla.org"],
@@ -1071,7 +1360,9 @@ def test_lando_merge_beta_to_release(build_payload):
                     "base-tag": "PRODUCT_{major_version}_BASE",
                     "end-tag": "PRODUCT_{major_version}_END",
                     "to-branch": "to-b",
+                    "to-revision": "abcdef",
                     "from-branch": "from-b",
+                    "from-revision": "ghijkl",
                 }
             }
         ],
@@ -1103,7 +1394,9 @@ def test_lando_merge_beta_to_release(build_payload):
                 "base_tag": "PRODUCT_{major_version}_BASE",
                 "end_tag": "PRODUCT_{major_version}_END",
                 "to_branch": "to-b",
+                "to_revision": "abcdef",
                 "from_branch": "from-b",
+                "from_revision": "ghijkl",
             },
         },
         "routes": [
