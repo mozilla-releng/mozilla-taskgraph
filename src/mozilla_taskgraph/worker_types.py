@@ -263,12 +263,14 @@ class EsrBumpConfig(Schema):
     to_branch: str
     fetch_version_from: str
     version_files: list[VersionFileStrict]
+    to_revision: str = ""
 
 
 class MainBumpConfig(Schema):
     to_branch: str
     fetch_version_from: str
     version_files: list[VersionFileStrict]
+    to_revision: str = ""
     replacements: Optional[list[list[str]]] = None
     regex_replacements: Optional[list[list[str]]] = None
     end_tag: Optional[str] = None
@@ -280,6 +282,7 @@ class EarlyToLateBetaConfig(Schema):
     # code cleaner, so we may as well require a real value
     # for it.
     fetch_version_from: str
+    to_revision: str = ""
     replacements: Optional[list[list[str]]] = None
 
 
@@ -288,6 +291,8 @@ class UpliftConfig(Schema):
     version_files: list[VersionFile]
     from_branch: str
     to_branch: str
+    from_revision: str = ""
+    to_revision: str = ""
     replacements: Optional[list[list[str]]] = None
     base_tag: Optional[str] = None
     end_tag: Optional[str] = None
