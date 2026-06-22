@@ -7,6 +7,8 @@ from importlib import import_module
 from taskgraph.config import validate_graph_config
 from taskgraph.util import schema
 
+from mozilla_taskgraph.parameters import register_parameters
+
 # Schemas for YAML files should use dashed identifiers by default. If there are
 # components of the schema for which there is a good reason to use another format,
 # exceptions can be added here.
@@ -26,6 +28,8 @@ def register(graph_config):
             "worker_types",
         ]
     )
+
+    register_parameters()
     validate_graph_config(graph_config._config)
 
 
