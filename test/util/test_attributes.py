@@ -7,52 +7,50 @@ import pytest
 from mozilla_taskgraph.util.attributes import release_level
 
 FIREFOX_BRANCHES = ["main", "beta", "release", "esr140"]
+RELEASE_BRANCHES = {
+    "firefox": FIREFOX_BRANCHES,
+    "mozilla-central": True,
+}
 
 
 @pytest.mark.parametrize(
-    "params,expected",
+    "release_branches,params,expected",
     (
         # Not level 3 -> always staging, regardless of branch.
-        ({"level": "1", "release_branches": True}, "staging"),
+        (RELEASE_BRANCHES, {"level": "1", "project": "mozilla-central"}, "staging"),
         (
-            {
-                "level": "1",
-                "release_branches": FIREFOX_BRANCHES,
-                "head_ref": "refs/heads/beta",
-            },
+            RELEASE_BRANCHES,
+            {"level": "1", "project": "firefox", "head_ref": "refs/heads/beta"},
             "staging",
         ),
-        # No release branches for the project -> staging (e.g. autoland).
-        ({"level": "3", "release_branches": None}, "staging"),
+        # No `release-branches` mapping at all -> staging.
+        (
+            None,
+            {"level": "3", "project": "firefox", "head_ref": "refs/heads/beta"},
+            "staging",
+        ),
+        # Project not listed in the mapping -> staging (e.g. autoland).
+        (RELEASE_BRANCHES, {"level": "3", "project": "autoland"}, "staging"),
         # Whole project is a release project (Mercurial model).
-        ({"level": "3", "release_branches": True}, "production"),
+        (RELEASE_BRANCHES, {"level": "3", "project": "mozilla-central"}, "production"),
         # Git monorepo model: only listed branches are production.
         (
-            {
-                "level": "3",
-                "release_branches": FIREFOX_BRANCHES,
-                "head_ref": "refs/heads/beta",
-            },
+            RELEASE_BRANCHES,
+            {"level": "3", "project": "firefox", "head_ref": "refs/heads/beta"},
             "production",
         ),
         (
-            {
-                "level": "3",
-                "release_branches": FIREFOX_BRANCHES,
-                "head_ref": "refs/heads/test",
-            },
+            RELEASE_BRANCHES,
+            {"level": "3", "project": "firefox", "head_ref": "refs/heads/test"},
             "staging",
         ),
         # Only refs/heads/* match, not tags.
         (
-            {
-                "level": "3",
-                "release_branches": FIREFOX_BRANCHES,
-                "head_ref": "refs/tags/beta",
-            },
+            RELEASE_BRANCHES,
+            {"level": "3", "project": "firefox", "head_ref": "refs/tags/beta"},
             "staging",
         ),
     ),
 )
-def test_release_level(params, expected):
-    assert release_level(params) == expected
+def test_release_level(release_branches, params, expected):
+    assert release_level(release_branches, params) == expected

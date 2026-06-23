@@ -29,7 +29,8 @@ if isinstance(tg.graph_config_schema, type) and issubclass(
         # Mapping of project to the branches that should be considered
         # "production" releases. A value of ``True`` means all branches of the
         # project are release branches, while a list restricts releases to the
-        # named branches. Consumed by ``mozilla_taskgraph.parameters``.
+        # named branches. Consumed by
+        # ``mozilla_taskgraph.util.attributes:release_level``.
         release_branches: Optional[dict[str, Union[bool, list[str]]]] = None
 
 else:

@@ -5,30 +5,25 @@
 import re
 
 
-def release_level(params):
+def release_level(release_branches, params):
     """Whether this is a production release or not.
 
-    The set of branches considered "production" is project specific and comes
-    from the ``release_branches`` parameter, which is resolved at decision time
-    from the graph config's ``release-branches`` mapping. A value of ``True``
-    means every branch of the project is a release branch (the model used by
-    Mercurial based projects), while a list restricts releases to the named
-    branches.
+    ``release_branches`` is the graph config's ``release-branches`` mapping of
+    project to the branches considered "production" for it. A value of ``True``
+    for a project means every branch of that project is a release branch (the
+    model used by Mercurial based projects), while a list restricts releases to
+    the named branches.
 
     :return str: One of "production" or "staging".
     """
-    if params["level"] != "3":
-        return "staging"
 
-    branches = params.get("release_branches")
-    if not branches:
-        return "staging"
-
-    if branches is True:
-        return "production"
-
-    m = re.match(r"refs/heads/(\S+)$", params["head_ref"])
-    if m is not None and m.group(1) in branches:
-        return "production"
+    if params["level"] == "3":
+        branches = (release_branches or {}).get(params["project"])
+        if branches is True or (
+            branches
+            and (m := re.match(r"refs/heads/(\S+)$", params["head_ref"]))
+            and m.group(1) in branches
+        ):
+            return "production"
 
     return "staging"
