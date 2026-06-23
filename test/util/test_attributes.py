@@ -23,9 +23,9 @@ RELEASE_BRANCHES = {
             {"level": "1", "project": "firefox", "head_ref": "refs/heads/beta"},
             "staging",
         ),
-        # No `release-branches` mapping at all -> staging.
+        # Empty `release-branches` mapping -> staging.
         (
-            None,
+            {},
             {"level": "3", "project": "firefox", "head_ref": "refs/heads/beta"},
             "staging",
         ),

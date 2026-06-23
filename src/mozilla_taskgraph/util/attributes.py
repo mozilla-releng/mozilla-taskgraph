@@ -5,7 +5,7 @@
 import re
 
 
-def release_level(release_branches, params):
+def release_level(release_branches: dict, params: dict):
     """Whether this is a production release or not.
 
     ``release_branches`` is the graph config's ``release-branches`` mapping of
@@ -14,16 +14,23 @@ def release_level(release_branches, params):
     model used by Mercurial based projects), while a list restricts releases to
     the named branches.
 
+    A build is only ever "production" at level 3. ``params`` provides ``level``
+    and ``project``, plus ``head_ref`` for projects configured with a branch
+    list.
+
     :return str: One of "production" or "staging".
     """
 
     if params["level"] == "3":
-        branches = (release_branches or {}).get(params["project"])
-        if branches is True or (
-            branches
-            and (m := re.match(r"refs/heads/(\S+)$", params["head_ref"]))
-            and m.group(1) in branches
-        ):
+        branches = release_branches.get(params["project"])
+
+        if branches is True:
             return "production"
+
+        if isinstance(branches, list):
+            match = re.match(r"refs/heads/(\S+)$", params["head_ref"])
+
+            if match and match.group(1) in branches:
+                return "production"
 
     return "staging"
