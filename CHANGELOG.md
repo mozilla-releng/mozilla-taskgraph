@@ -1,3 +1,10 @@
+## 4.2.0 (2026-06-24)
+
+### Added
+
+- Support `to-revision` and `from-revision` in landoscript payloads (#219)
+- Add release_level helper function (#220)
+
 ## 4.1.3 (2026-06-03)
 
 ### Fix
