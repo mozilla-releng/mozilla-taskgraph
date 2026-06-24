@@ -1,5 +1,5 @@
 from textwrap import dedent
-from typing import Optional
+from typing import Optional, Union
 
 from taskgraph import config as tg
 from taskgraph.util.schema import Schema
@@ -26,6 +26,12 @@ if isinstance(tg.graph_config_schema, type) and issubclass(
         # string to use for release tasks.
         # Defaults to ``mozilla_taskgraph.version:default_parser``.
         version_parser: Optional[str] = None
+        # Mapping of project to the branches that should be considered
+        # "production" releases. A value of ``True`` means all branches of the
+        # project are release branches, while a list restricts releases to the
+        # named branches. Consumed by
+        # ``mozilla_taskgraph.util.attributes:release_level``.
+        release_branches: Optional[dict[str, Union[bool, list[str]]]] = None
 
 else:
     # Legacy voluptuous-based graph_config_schema (e.g. gecko_taskgraph override).
@@ -48,6 +54,15 @@ else:
                     Defaults to ``mozilla_taskgraph.version:default_parser``.
                     """.lstrip()),
             ): str,
+            Vol_Optional(
+                "release-branches",
+                description=dedent("""
+                    Mapping of project to the branches that should be considered
+                    "production" releases. A value of ``True`` means all branches
+                    of the project are release branches, while a list restricts
+                    releases to the named branches.
+                    """.lstrip()),
+            ): {str: object},
         }
     )
 

@@ -26,6 +26,7 @@ def register(graph_config):
             "worker_types",
         ]
     )
+
     validate_graph_config(graph_config._config)
 
 
