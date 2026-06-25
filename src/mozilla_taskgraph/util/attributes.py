@@ -4,6 +4,38 @@
 
 import re
 
+_COPYABLE_ATTRIBUTES = (
+    "accepted-mar-channel-ids",
+    "artifact_map",
+    "artifact_prefix",
+    "build_platform",
+    "build_type",
+    "l10n_chunk",
+    "locale",
+    "mar-channel-id",
+    "maven_packages",
+    "nightly",
+    "shippable",
+    "shipping_phase",
+    "shipping_product",
+    "signed",
+    "stub-installer",
+    "update-channel",
+)
+
+
+def copy_attributes_from_dependent_job(dep_job, denylist=()):
+    """Copy the curated ``_COPYABLE_ATTRIBUTES`` from a dependent job.
+
+    Only attributes present on ``dep_job`` and not in ``denylist`` are copied,
+    so entries that don't apply to a given job are simply skipped.
+    """
+    return {
+        attr: dep_job.attributes[attr]
+        for attr in _COPYABLE_ATTRIBUTES
+        if attr in dep_job.attributes and attr not in denylist
+    }
+
 
 def release_level(release_branches: dict, params: dict):
     """Whether this is a production release or not.
