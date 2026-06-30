@@ -2,9 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from types import SimpleNamespace
+
 import pytest
 
-from mozilla_taskgraph.util.attributes import release_level
+from mozilla_taskgraph.util.attributes import (
+    copy_attributes_from_dependent_job,
+    release_level,
+)
 
 FIREFOX_BRANCHES = ["main", "beta", "release", "esr140"]
 RELEASE_BRANCHES = {
@@ -54,3 +59,23 @@ RELEASE_BRANCHES = {
 )
 def test_release_level(release_branches, params, expected):
     assert release_level(release_branches, params) == expected
+
+
+def test_copy_attributes_from_dependent_job():
+    dep_job = SimpleNamespace(
+        attributes={
+            "build_platform": "linux64",
+            "shippable": True,
+            "locale": "de",
+            "not_copyable": "x",  # not in _COPYABLE_ATTRIBUTES -> skipped
+        }
+    )
+    assert copy_attributes_from_dependent_job(dep_job) == {
+        "build_platform": "linux64",
+        "shippable": True,
+        "locale": "de",
+    }
+    assert copy_attributes_from_dependent_job(dep_job, denylist=("locale",)) == {
+        "build_platform": "linux64",
+        "shippable": True,
+    }
