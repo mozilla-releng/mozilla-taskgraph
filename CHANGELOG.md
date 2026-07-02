@@ -1,3 +1,9 @@
+## 4.3.0 (2026-07-02)
+
+### Added
+
+- copy_attributes_from_dependent_job utility (#222)
+
 ## 4.2.0 (2026-06-24)
 
 ### Added
