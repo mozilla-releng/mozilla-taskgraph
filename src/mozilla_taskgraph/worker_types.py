@@ -450,9 +450,8 @@ def get_release_config(config):
         config (TransformConfig): The configuration for the kind being transformed.
 
     When the `PARTIAL_UPDATES` environment variable is set (as done by the
-    `release_promotion` action) and the current kind is listed in the
-    `partial-updates-kinds` graph config, a `partial_versions` entry describing
-    the partial updates is also included.
+    `release_promotion` action), a `partial_versions` entry describing the
+    partial updates is also included.
 
     Returns:
         dict: containing at least `build_number` and `version`.  This can be
@@ -466,8 +465,7 @@ def get_release_config(config):
     }
 
     partial_updates = os.environ.get("PARTIAL_UPDATES", "")
-    partial_updates_kinds = config.graph_config.get("partial-updates-kinds") or []
-    if partial_updates != "" and config.kind in partial_updates_kinds:
+    if partial_updates != "":
         partial_updates = json.loads(partial_updates)
         release_config["partial_versions"] = ", ".join(
             [
@@ -475,8 +473,6 @@ def get_release_config(config):
                 for v, info in partial_updates.items()
             ]
         )
-        if release_config["partial_versions"] == "{}":
-            del release_config["partial_versions"]
 
     return release_config
 

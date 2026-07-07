@@ -1485,16 +1485,13 @@ def test_beetmover_upload_data_bad_encoding(build_payload):
 
 @pytest.fixture
 def make_release_config(monkeypatch, make_graph_config, parameters):
-    def inner(kind, partial_updates=None, partial_updates_kinds=None):
+    def inner(kind, partial_updates=None):
         if partial_updates is None:
             monkeypatch.delenv("PARTIAL_UPDATES", raising=False)
         else:
             monkeypatch.setenv("PARTIAL_UPDATES", partial_updates)
 
-        extra_config = {}
-        if partial_updates_kinds is not None:
-            extra_config["partial-updates-kinds"] = partial_updates_kinds
-        graph_config = make_graph_config(extra_config=extra_config)
+        graph_config = make_graph_config()
 
         config = TransformConfig(
             kind, "test", {}, parameters, {}, graph_config, write_artifacts=False
@@ -1520,24 +1517,5 @@ def test_get_release_config_partials(make_release_config):
     release_config = make_release_config(
         "release-update-verify-config",
         partial_updates=partial_updates,
-        partial_updates_kinds=["release-update-verify-config"],
     )
     assert release_config["partial_versions"] == "70.0build1, 69.0build3"
-
-
-def test_get_release_config_partials_ignored_for_unlisted_kinds(make_release_config):
-    partial_updates = json.dumps({"70.0": {"buildNumber": 1}})
-    release_config = make_release_config(
-        "release-beetmover",
-        partial_updates=partial_updates,
-        partial_updates_kinds=["release-update-verify-config"],
-    )
-    assert "partial_versions" not in release_config
-
-
-def test_get_release_config_partials_no_kinds_configured(make_release_config):
-    partial_updates = json.dumps({"70.0": {"buildNumber": 1}})
-    release_config = make_release_config(
-        "release-update-verify-config", partial_updates=partial_updates
-    )
-    assert "partial_versions" not in release_config

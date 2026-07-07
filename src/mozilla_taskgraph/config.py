@@ -32,10 +32,6 @@ if isinstance(tg.graph_config_schema, type) and issubclass(
         # named branches. Consumed by
         # ``mozilla_taskgraph.util.attributes:release_level``.
         release_branches: Optional[dict[str, Union[bool, list[str]]]] = None
-        # Kinds whose tasks consume partial updates. When the ``PARTIAL_UPDATES``
-        # environment variable is set, ``get_release_config`` injects a
-        # ``partial_versions`` entry for tasks of these kinds.
-        partial_updates_kinds: Optional[list[str]] = None
 
 else:
     # Legacy voluptuous-based graph_config_schema (e.g. gecko_taskgraph override).
@@ -67,15 +63,6 @@ else:
                     releases to the named branches.
                     """.lstrip()),
             ): {str: object},
-            Vol_Optional(
-                "partial-updates-kinds",
-                description=dedent("""
-                    Kinds whose tasks consume partial updates. When the
-                    ``PARTIAL_UPDATES`` environment variable is set,
-                    ``get_release_config`` injects a ``partial_versions`` entry
-                    for tasks of these kinds.
-                    """.lstrip()),
-            ): [str],
         }
     )
 
