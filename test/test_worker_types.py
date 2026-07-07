@@ -1,12 +1,15 @@
 import inspect
+import json
 from pprint import pprint
 from typing import Optional
 
 import pytest
+from taskgraph.transforms.base import TransformConfig
 from taskgraph.transforms.task import payload_builders
 from taskgraph.util.schema import validate_schema
 
 import mozilla_taskgraph.worker_types  # noqa - trigger payload_builder registration
+from mozilla_taskgraph.worker_types import get_release_config
 
 
 @pytest.fixture
@@ -1478,3 +1481,41 @@ def test_beetmover_upload_data_bad_encoding(build_payload):
         assert False, "should've raised an exception"
     except Exception as e:
         assert "data must be base64 encoded" in e.args[0]
+
+
+@pytest.fixture
+def make_release_config(monkeypatch, make_graph_config, parameters):
+    def inner(kind, partial_updates=None):
+        if partial_updates is None:
+            monkeypatch.delenv("PARTIAL_UPDATES", raising=False)
+        else:
+            monkeypatch.setenv("PARTIAL_UPDATES", partial_updates)
+
+        graph_config = make_graph_config()
+
+        config = TransformConfig(
+            kind, "test", {}, parameters, {}, graph_config, write_artifacts=False
+        )
+        return get_release_config(config)
+
+    return inner
+
+
+def test_get_release_config_base(make_release_config):
+    assert make_release_config("release-beetmover") == {
+        "version": "99.0",
+        "appVersion": "99.0",
+        "next_version": "100.0",
+        "build_number": 1,
+    }
+
+
+def test_get_release_config_partials(make_release_config):
+    partial_updates = json.dumps(
+        {"70.0": {"buildNumber": 1}, "69.0": {"buildNumber": 3}}
+    )
+    release_config = make_release_config(
+        "release-update-verify-config",
+        partial_updates=partial_updates,
+    )
+    assert release_config["partial_versions"] == "70.0build1, 69.0build3"

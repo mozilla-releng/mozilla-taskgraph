@@ -1,4 +1,6 @@
 import binascii
+import json
+import os
 from base64 import b64decode
 from typing import Literal, Optional, Union
 
@@ -447,16 +449,32 @@ def get_release_config(config):
     Args:
         config (TransformConfig): The configuration for the kind being transformed.
 
+    When the `PARTIAL_UPDATES` environment variable is set (as done by the
+    `release_promotion` action), a `partial_versions` entry describing the
+    partial updates is also included.
+
     Returns:
-        dict: containing both `build_number` and `version`.  This can be used to
-            update `task.payload`.
+        dict: containing at least `build_number` and `version`.  This can be
+            used to update `task.payload`.
     """
-    return {
+    release_config = {
         "version": config.params["version"],
         "appVersion": config.params["app_version"],
         "next_version": config.params["next_version"],
         "build_number": config.params["build_number"],
     }
+
+    partial_updates = os.environ.get("PARTIAL_UPDATES", "")
+    if partial_updates != "":
+        partial_updates = json.loads(partial_updates)
+        release_config["partial_versions"] = ", ".join(
+            [
+                "{}build{}".format(v, info["buildNumber"])
+                for v, info in partial_updates.items()
+            ]
+        )
+
+    return release_config
 
 
 def process_l10n_bump_info(info):
