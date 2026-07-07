@@ -1,3 +1,9 @@
+## 4.4.0 (2026-07-07)
+
+### Added
+
+- include partial_versions in get_release_config (#234)
+
 ## 4.3.0 (2026-07-02)
 
 ### Added
