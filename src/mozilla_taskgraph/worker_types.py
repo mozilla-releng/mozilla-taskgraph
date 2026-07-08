@@ -342,6 +342,7 @@ def build_lando_payload(config, task, task_def):
     if worker.get("force-dry-run"):
         task_def["payload"]["dry_run"] = True
 
+    bump_files: list[str] = []
     for action in worker["actions"]:
         if info := action.get("android-l10n-import"):
             android_l10n_import_info = dash_to_underscore(info)
@@ -391,6 +392,7 @@ def build_lando_payload(config, task, task_def):
             bump_info = {}
             bump_info["next_version"] = release_config["next_version"]
             bump_info["files"] = info["bump-files"]
+            bump_files = info["bump-files"]
             task_def["payload"]["version_bump_info"] = bump_info
             actions.append("version_bump")
 
@@ -430,7 +432,13 @@ def build_lando_payload(config, task, task_def):
 
     scopes = set(task_def.get("scopes", []))
     scopes.add(f"project:releng:lando:repo:{worker['lando-repo']}")
-    scopes.update([f"project:releng:lando:action:{action}" for action in actions])
+    scopes.update(
+        f"project:releng:lando:action:{a}" for a in actions if a != "version_bump"
+    )
+    if "version_bump" in actions:
+        scopes.update(
+            f"project:releng:lando:action:version_bump:file:{f}" for f in bump_files
+        )
 
     for matrix_room in worker.get("matrix-rooms", []):
         task_def.setdefault("routes", [])

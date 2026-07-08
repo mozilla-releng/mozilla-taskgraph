@@ -753,7 +753,8 @@ def test_lando_version_bump(build_payload):
             },
         },
         "scopes": [
-            "project:releng:lando:action:version_bump",
+            "project:releng:lando:action:version_bump:file:another/file.txt",
+            "project:releng:lando:action:version_bump:file:foo/bar/a.txt",
             "project:releng:lando:repo:testrepo",
         ],
         "tags": {"worker-implementation": "scriptworker"},
