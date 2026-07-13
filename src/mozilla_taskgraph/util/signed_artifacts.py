@@ -2,6 +2,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from taskgraph.util.taskcluster import get_artifact_path
+
+LANGPACK_SIGN_PLATFORMS = {  # set
+    "linux64-shippable",
+    "linux64-devedition",
+    "macosx64-shippable",
+    "macosx64-devedition",
+}
+
 
 def get_signed_artifacts(input, formats, behavior=None):
     """
@@ -19,3 +28,150 @@ def get_signed_artifacts(input, formats, behavior=None):
         artifacts.add(f"{input}.asc")
 
     return artifacts
+
+
+def is_partner_kind(kind):
+    if kind and kind.startswith(("release-partner", "release-eme-free")):
+        return True
+
+
+def is_notarization_kind(kind):
+    if kind and "notarization" in kind:
+        return True
+
+
+def generate_specifications_of_artifacts_to_sign(
+    config, job, keep_locale_template=True, kind=None, dep_kind=None
+):
+    """Return the list of artifact/format specifications to sign for ``job``.
+
+    Handles the desktop and source build platforms shared across Gecko
+    applications. Consumers with additional platforms (e.g. GeckoView on
+    Android) should handle those before delegating here.
+    """
+    build_platform = job["attributes"].get("build_platform")
+    use_stub = job["attributes"].get("stub-installer")
+    # Get locales to know if we want to sign ja-JP-mac langpack
+    locales = job["attributes"].get("chunk_locales", [])
+    if kind == "release-source-signing":
+        artifacts_specifications = [
+            {
+                "artifacts": [get_artifact_path(job, "source.tar.xz")],
+                "formats": ["gcp_prod_autograph_gpg"],
+            }
+        ]
+    # XXX: Mars aren't signed here (on any platform) because internals will be
+    # signed at after this stage of the release
+    elif "macosx" in build_platform:
+        langpack_formats = []
+        if is_notarization_kind(config.kind):
+            formats = ["apple_notarization_stacked"]
+            artifacts_specifications = [
+                {
+                    "artifacts": [
+                        get_artifact_path(job, "{locale}/target.tar.gz"),
+                        get_artifact_path(job, "{locale}/target.pkg"),
+                    ],
+                    "formats": formats,
+                }
+            ]
+        else:
+            # This task is mac-signing
+            if is_partner_kind(kind):
+                extension = "tar.gz"
+            else:
+                extension = "dmg"
+            artifacts_specifications = [
+                {
+                    "artifacts": [
+                        get_artifact_path(job, f"{{locale}}/target.{extension}")
+                    ],
+                    "formats": ["macapp", "gcp_prod_autograph_widevine"],
+                }
+            ]
+            langpack_formats = ["gcp_prod_autograph_langpack"]
+
+        if "ja-JP-mac" in locales and build_platform in LANGPACK_SIGN_PLATFORMS:
+            artifacts_specifications += [
+                {
+                    "artifacts": [
+                        get_artifact_path(job, "ja-JP-mac/target.langpack.xpi")
+                    ],
+                    "formats": langpack_formats,
+                }
+            ]
+    elif "win" in build_platform:
+        artifacts_specifications = [
+            {
+                "artifacts": [
+                    get_artifact_path(job, "{locale}/setup.exe"),
+                ],
+                "formats": ["gcp_prod_autograph_authenticode_202412"],
+            },
+            {
+                "artifacts": [
+                    get_artifact_path(job, "{locale}/target.zip"),
+                ],
+                "formats": [
+                    "gcp_prod_autograph_authenticode_202412",
+                    "gcp_prod_autograph_widevine",
+                ],
+            },
+        ]
+
+        if use_stub:
+            artifacts_specifications[0]["artifacts"] += [
+                get_artifact_path(job, "{locale}/setup-stub.exe")
+            ]
+    elif "linux" in build_platform:
+        artifacts_specifications = [
+            {
+                "artifacts": [get_artifact_path(job, "{locale}/target.tar.xz")],
+                "formats": ["gcp_prod_autograph_gpg", "gcp_prod_autograph_widevine"],
+            }
+        ]
+        dep_job = config.kind_dependencies_tasks[job["dependencies"][dep_kind]]
+        if build_platform in LANGPACK_SIGN_PLATFORMS and not dep_job.attributes.get(
+            "artifact-build"
+        ):
+            artifacts_specifications += [
+                {
+                    "artifacts": [
+                        get_artifact_path(job, "{locale}/target.langpack.xpi")
+                    ],
+                    "formats": ["gcp_prod_autograph_langpack"],
+                }
+            ]
+    else:
+        raise Exception("Platform not implemented for signing")
+
+    if not keep_locale_template:
+        artifacts_specifications = _strip_locale_template(artifacts_specifications)
+
+    if is_partner_kind(kind):
+        artifacts_specifications = _strip_widevine_for_partners(
+            artifacts_specifications
+        )
+
+    return artifacts_specifications
+
+
+def _strip_locale_template(artifacts_without_locales):
+    for spec in artifacts_without_locales:
+        for index, artifact in enumerate(spec["artifacts"]):
+            stripped_artifact = artifact.format(locale="")
+            stripped_artifact = stripped_artifact.replace("//", "/")
+            spec["artifacts"][index] = stripped_artifact
+
+    return artifacts_without_locales
+
+
+def _strip_widevine_for_partners(artifacts_specifications):
+    """Partner repacks should not resign that's previously signed for fear of breaking partial
+    updates
+    """
+    for spec in artifacts_specifications:
+        if "gcp_prod_autograph_widevine" in spec["formats"]:
+            spec["formats"].remove("gcp_prod_autograph_widevine")
+
+    return artifacts_specifications
