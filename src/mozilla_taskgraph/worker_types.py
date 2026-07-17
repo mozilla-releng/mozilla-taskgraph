@@ -237,7 +237,8 @@ class L10nBumpInfo(Schema):
 
 class TagConfig(Schema):
     types: list[Literal["buildN", "release"]]
-    hg_repo_url: str
+    revision: str
+    hg_repo_url: Optional[str]
 
 
 class VersionBumpConfig(Schema):
@@ -379,11 +380,11 @@ def build_lando_payload(config, task, task_def):
                 tag_names.extend([f"{product}_{version}_RELEASE"])
             tag_info = {
                 "tags": tag_names,
-                "hg_repo_url": info["hg-repo-url"],
-                "revision": config.params[
-                    "{}head_rev".format(worker.get("repo-param-prefix", ""))
-                ],
+                "revision": info["revision"],
             }
+            if repo_url := info.get("hg-repo-url"):
+                tag_info["hg_repo_url"] = repo_url
+
             task_def["payload"]["tag_info"] = tag_info
             actions.append("tag")
 
