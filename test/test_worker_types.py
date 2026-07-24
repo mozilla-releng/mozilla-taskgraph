@@ -675,45 +675,72 @@ def test_lando_l10n_bump(build_payload):
 
 
 @pytest.mark.parametrize(
-    "types,expected",
+    "hg_repo_url,revision,types,expected",
     (
         pytest.param(
+            "https://hg/repo",
+            "abcdefghi",
             ["buildN"],
             ["PRODUCT_99_0_BUILD1"],
-            id="buildN",
+            id="hg_buildN",
         ),
         pytest.param(
+            "https://hg/repo",
+            "abcdefghi",
             ["release"],
             ["PRODUCT_99_0_RELEASE"],
-            id="release",
+            id="hg_release",
         ),
         pytest.param(
+            "https://hg/repo",
+            "abcdefghi",
             ["buildN", "release"],
             ["PRODUCT_99_0_BUILD1", "PRODUCT_99_0_RELEASE"],
-            id="buildN_and_release",
+            id="hg_buildN_and_release",
+        ),
+        pytest.param(
+            None,
+            "abcdefghi",
+            ["buildN"],
+            ["PRODUCT_99_0_BUILD1"],
+            id="git_buildN",
+        ),
+        pytest.param(
+            None,
+            "abcdefghi",
+            ["release"],
+            ["PRODUCT_99_0_RELEASE"],
+            id="git_release",
+        ),
+        pytest.param(
+            None,
+            "abcdefghi",
+            ["buildN", "release"],
+            ["PRODUCT_99_0_BUILD1", "PRODUCT_99_0_RELEASE"],
+            id="git_buildN_and_release",
         ),
     ),
 )
-def test_lando_tag(build_payload, types, expected):
+def test_lando_tag(build_payload, hg_repo_url, revision, types, expected):
     worker = {
         "lando-repo": "testrepo",
         "actions": [
             {
                 "tag": {
                     "types": types,
-                    "hg-repo-url": "https://hg/repo",
+                    "hg-repo-url": hg_repo_url,
+                    "revision": revision,
                 }
             }
         ],
     }
     _, task_def = build_payload("scriptworker-lando", worker=worker)
-    assert task_def == {
+    expected = {
         "payload": {
             "actions": ["tag"],
             "lando_repo": "testrepo",
             "tag_info": {
-                "hg_repo_url": "https://hg/repo",
-                "revision": "abcdef",
+                "revision": revision,
                 "tags": expected,
             },
         },
@@ -723,6 +750,10 @@ def test_lando_tag(build_payload, types, expected):
         ],
         "tags": {"worker-implementation": "scriptworker"},
     }
+    if hg_repo_url:
+        expected["payload"]["tag_info"]["hg_repo_url"] = hg_repo_url
+
+    assert task_def == expected
 
 
 def test_lando_version_bump(build_payload):
