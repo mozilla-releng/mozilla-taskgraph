@@ -1,3 +1,11 @@
+## 5.0.0 (2026-07-24)
+
+### Changed
+
+- `tag` actions in the `scriptworker-lando` payload builder now support git
+  - BREAKING CHANGE: This work has necessitated the removal of the automatic look-up of it in parameters; it must now be present in the `tag` action information.
+  - `hg_repo_url` is now optional
+
 ## 4.4.0 (2026-07-07)
 
 ### Added
