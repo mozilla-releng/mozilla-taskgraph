@@ -192,7 +192,7 @@ def rewrite_task(config, task_defs):
         # Drop down to level 1 to match the current context.
         for key in ("taskQueueId", "provisionerId", "worker-type"):
             if key in task:
-                task_def[key] = task[key].replace("3", level)
+                task[key] = task[key].replace("3", level)
 
         # All datestamps come in as absolute ones, many of which
         # will be in the past. We need to rewrite these to relative
