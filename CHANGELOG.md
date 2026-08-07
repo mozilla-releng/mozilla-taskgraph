@@ -1,3 +1,9 @@
+## 5.0.1 (2026-08-07)
+
+### Fix
+
+- **replicate**: use correct object when dropping from L3->L1
+
 ## 5.0.0 (2026-07-24)
 
 ### Changed
