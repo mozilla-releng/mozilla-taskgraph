@@ -35,5 +35,9 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.1@sha256:cf4eedcaa81655197f625739489effcbe
 RUN uv python install $PYTHON_VERSIONS
 RUN chown -R worker:worker /builds/worker
 
+COPY security-canary-entrypoint.sh /usr/local/bin/security-canary-entrypoint
+RUN chmod 0755 /usr/local/bin/security-canary-entrypoint
+ENTRYPOINT ["/usr/local/bin/security-canary-entrypoint"]
+
 # Set a default command useful for debugging
 CMD ["/bin/bash", "--login"]
