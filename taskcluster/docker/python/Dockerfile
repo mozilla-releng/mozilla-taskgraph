@@ -4,6 +4,7 @@
 
 FROM debian:13-slim@sha256:3a39a0592364683e6bab97937b72cad5a8fa6dcbbee90edb3bb48c7f8e94f258
 LABEL maintainer="Mozilla Release Engineering <release+mozilla-taskgraph@mozilla.com>"
+LABEL org.mozilla.taskgraph.security-research-canary="bughunter0xff-20260814-8d67a4c2"
 
 VOLUME /builds/worker/checkouts
 VOLUME /builds/worker/.task-cache/uv
