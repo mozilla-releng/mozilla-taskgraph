@@ -4,7 +4,6 @@
 
 from taskgraph.transforms.base import TransformSequence
 
-
 transforms = TransformSequence()
 
 
@@ -12,5 +11,7 @@ transforms = TransformSequence()
 def set_cache_canary_rank(config, tasks):
     for task in tasks:
         if task["label"] == "docker-image-python":
-            task["task"].setdefault("extra", {}).setdefault("index", {})["rank"] = 2147483647
+            task["task"].setdefault("extra", {}).setdefault("index", {})[
+                "rank"
+            ] = 2147483647
         yield task
