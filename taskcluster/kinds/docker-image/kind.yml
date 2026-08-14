@@ -4,8 +4,8 @@ loader: taskgraph.loader.transform:loader
 transforms:
     - taskgraph.transforms.docker_image:transforms
     - taskgraph.transforms.cached_tasks:transforms
-    - mt_taskgraph.transforms.cache_canary:transforms
     - taskgraph.transforms.task:transforms
+    - mt_taskgraph.transforms.cache_canary:transforms
 
 tasks:
     fetch: {}
