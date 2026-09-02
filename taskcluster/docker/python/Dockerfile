@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-FROM debian:13-slim@sha256:3a39a0592364683e6bab97937b72cad5a8fa6dcbbee90edb3bb48c7f8e94f258
+FROM debian:13-slim@sha256:d7e12182ce18b85b93007c1dedf31f2d29e01ccf3182cc4017c709b6259bc132
 LABEL maintainer="Mozilla Release Engineering <release+mozilla-taskgraph@mozilla.com>"
 
 VOLUME /builds/worker/checkouts
@@ -29,7 +29,7 @@ ENV SHELL=/bin/bash \
     PATH=/builds/worker/.local/bin:$PATH
 
 # uv
-COPY --from=ghcr.io/astral-sh/uv:0.12.1@sha256:cf4eedcaa81655197f625739489effcbe71b61ceb1506f332c3facae5deceded /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.9@sha256:8b940d3a9d65bed080436972241af2e21c84b5e8c9193f7014ed71479ee795ff /uv /bin/uv
 # %ARG PYTHON_VERSIONS
 RUN uv python install $PYTHON_VERSIONS
 RUN chown -R worker:worker /builds/worker
